@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link, useNavigate,NavLink } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate, NavLink } from 'react-router-dom';
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { BsList } from 'react-icons/bs';
 import styled from 'styled-components';
@@ -18,7 +18,6 @@ const StyledNavbar = styled(Navbar)`
       margin-right: 10px;
     }
   }
-  
 
   .nav-link {
     color: #333 !important;
@@ -47,9 +46,6 @@ const StyledNavbar = styled(Navbar)`
     }
   }
 
-
-  }
-  
   .btn-new-advert {
     background-color: #0a6638;
     color: #fff;
@@ -105,7 +101,7 @@ const AnimalCategories = styled.div`
   }
   
   @media (max-width: 768px) {
-   display: none;
+    display: none;
   }
 `;
 
@@ -121,13 +117,20 @@ const LoginButton = styled(Button)`
 
 const Header = ({ handleLoginModal, isLoggedIn, userProfilePic }) => {
   const navigate = useNavigate();
+  const [expanded, setExpanded] = useState(false);
 
   const handleProfileClick = () => {
     if (isLoggedIn) {
       navigate('/profile');
+      setExpanded(false);
     } else {
       handleLoginModal(true);
+      setExpanded(false);
     }
+  };
+
+  const handleNavClick = () => {
+    setExpanded(false);
   };
 
   const animalCategories = [
@@ -143,26 +146,27 @@ const Header = ({ handleLoginModal, isLoggedIn, userProfilePic }) => {
 
   return (
     <>
-      <StyledNavbar expand="lg" fixed="top">
+      <StyledNavbar expand="lg" fixed="top" expanded={expanded}>
         <Container>
-          <Navbar.Brand as={Link} to="/">
+          <Navbar.Brand as={Link} to="/" onClick={() => setExpanded(false)}>
             <img src={logoImage} alt="Pets4Home" />
           </Navbar.Brand>
-          <Navbar.Toggle aria-controls="basic-navbar-nav">
+          <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={() => setExpanded(!expanded)}>
             <BsList />
           </Navbar.Toggle>
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
-              <NavLink to="/" className="nav-link">Home</NavLink>
-              <NavLink to="/search" className="nav-link">Search</NavLink>
-              <NavLink to="/messages" className="nav-link">Messages</NavLink>
-              <NavLink to="/knowledge-hub" className="nav-link">Knowledge Hub</NavLink>
+              <NavLink to="/" className="nav-link" onClick={handleNavClick}>Home</NavLink>
+              <NavLink to="/search" className="nav-link" onClick={handleNavClick}>Search</NavLink>
+              <NavLink to="/messages" className="nav-link" onClick={handleNavClick}>Messages</NavLink>
+              <NavLink to="/knowledge-hub" className="nav-link" onClick={handleNavClick}>Knowledge Hub</NavLink>
             </Nav>
             <div className="profile-section">
               <Button 
                 as={Link} 
                 to="/add-advert" 
                 className="btn-new-advert"
+                onClick={handleNavClick}
               >
                 + New Advert
               </Button>
@@ -179,7 +183,10 @@ const Header = ({ handleLoginModal, isLoggedIn, userProfilePic }) => {
                   onClick={handleProfileClick}
                 />
               ) : (
-                <LoginButton onClick={() => handleLoginModal(true)}>
+                <LoginButton onClick={() => {
+                  handleLoginModal(true);
+                  setExpanded(false);
+                }}>
                   Login / Sign Up
                 </LoginButton>
               )}
@@ -190,7 +197,7 @@ const Header = ({ handleLoginModal, isLoggedIn, userProfilePic }) => {
       <div style={{ marginTop: '76px' }}>
         <AnimalCategories>
           {animalCategories.map((category, index) => (
-            <Link key={index} to={category.path} className="category-item">
+            <Link key={index} to={category.path} className="category-item" onClick={handleNavClick}>
               <svg viewBox="0 0 24 24">
                 <path fill="currentColor" d={category.icon} />
               </svg>
