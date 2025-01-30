@@ -2,6 +2,8 @@ import Header from './Header';
 import Footer from './Footer';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { useScrollTop } from '../hooks/useScrollTop';
+
 import profileImage from '../assets/profile.png';
 const LayoutWrapper = styled.div`
   display: flex;
@@ -18,6 +20,7 @@ const MainContent = styled.main`
 `;
 
 const Layout = ({ children, isDarkMode, toggleTheme,handleLoginModal }) => {
+  useScrollTop();
   return (
     <LayoutWrapper isDarkMode={isDarkMode}>
 <Header 

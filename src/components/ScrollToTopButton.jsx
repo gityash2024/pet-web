@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { ArrowUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLocation } from 'react-router-dom';
 
 const ScrollButton = styled(motion.button)`
   position: fixed;
@@ -21,6 +20,8 @@ const ScrollButton = styled(motion.button)`
   z-index: 99999;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
+  opacity: ${props => props.visible ? 1 : 0};
+  pointer-events: ${props => props.visible ? 'auto' : 'none'};
 
   &:hover {
     background-color: #085530;
@@ -40,36 +41,13 @@ const ScrollButton = styled(motion.button)`
   }
 `;
 
-const buttonVariants = {
-  initial: { opacity: 0, y: 20 },
-  animate: { 
-    opacity: 1, 
-    y: 0,
-    transition: {
-      duration: 0.3
-    }
-  },
-  exit: { 
-    opacity: 0, 
-    y: 20,
-    transition: {
-      duration: 0.2
-    }
-  }
-};
-
-const ScrollToTop = () => {
-  const [isVisible, setIsVisible] = useState(false);
-  const { pathname } = useLocation();
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+const ScrollToTopButton = () => {
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const toggleVisibility = () => {
-      const scrolled = document.documentElement.scrollTop;
-      setIsVisible(scrolled > 300);
+      const scrollY = window.scrollY;
+      setVisible(scrollY > 300);
     };
 
     window.addEventListener('scroll', toggleVisibility);
@@ -85,13 +63,13 @@ const ScrollToTop = () => {
 
   return (
     <AnimatePresence>
-      {isVisible && (
+      {visible && (
         <ScrollButton
+          visible={visible}
           onClick={scrollToTop}
-          variants={buttonVariants}
-          initial="initial"
-          animate="animate"
-          exit="exit"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
         >
@@ -102,4 +80,4 @@ const ScrollToTop = () => {
   );
 };
 
-export default ScrollToTop;
+export default ScrollToTopButton;

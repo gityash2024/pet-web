@@ -18,12 +18,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import './style.css';
 import ToastContainer from './components/Toast/ToastContainer';
-import ScrollToTop from './components/ScrollToTopButton';
 import NotFound from './components/NotFound';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsAndConditions from './components/TermsAndConditions';
 import ContactUs from './components/ContactUs';
 import AboutUs from './components/AboutUs';
+import ScrollToTopButton from './components/ScrollToTopButton'; // The button component
 
 function AppRoutes() {
   const navigate = useNavigate();
@@ -62,9 +62,8 @@ function AppRoutes() {
           <Route path="*" element={<NotFound />} /> 
 
         </Routes>
-        {/* Move ScrollToTop component outside of Routes */}
       </Layout>
-      <ScrollToTop />
+      <ScrollToTopButton /> 
       <LoginModal 
         show={showLogin} 
         handleClose={() => handleLoginModal(false)} 
