@@ -1,237 +1,274 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Form, InputGroup, Badge, Pagination } from 'react-bootstrap';
-import { FaSearch, FaBookmark, FaRegBookmark, FaChevronLeft, FaChevronRight, FaNewspaper } from 'react-icons/fa';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Container, Row, Col, Card, Button, Form, InputGroup } from 'react-bootstrap';
+import { FaSearch, FaFilter, FaTimes, FaBook } from 'react-icons/fa';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { getAllArticles, bookmarkArticle, unbookmarkArticle } from '../contexts/api';
+import { getAllArticles } from '../contexts/api';
 import { toast } from 'react-toastify';
 import DOMPurify from 'dompurify';
-const NoArticlesContainer = styled.div`
+import profileImage from '../assets/profile.png';
+
+const PageWrapper = styled.div`
+  background-color: #f4f4f4;
+  min-height: 100vh;
+  padding: 40px 0;
+`;
+
+const FilterSidebar = styled(Card)`
+  background-color: #fff;
+  border: none;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  position: sticky;
+  top: 100px;
+  z-index: 10;
+`;
+
+const ArticleListContainer = styled.div`
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  padding: 20px;
+`;
+
+const ArticleCard = styled(motion.div)`
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 300px;
-  text-align: center;
-`;
-
-const NoArticlesIcon = styled(FaNewspaper)`
-  font-size: 5rem;
-  color: ${props => props.isDarkMode ? '#ffffff4d' : '#00000033'};
-  margin-bottom: 1rem;
-`;
-
-const StyledKnowledgeHub = styled.div`
-  background-color: ${props => props.isDarkMode ? '#1a1a1a' : '#f8f9fa'};
-  color: ${props => props.isDarkMode ? '#fff' : '#333'};
-  min-height: 100vh;
-  padding: 80px 0;
-`;
-
-const GlassmorphicCard = styled(motion.div)`
-  background: ${props => props.isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.7)'};
-  backdrop-filter: blur(10px);
-  border-radius: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-  padding: 20px;
-  margin-bottom: 20px;
-`;
-
-const StyledCard = styled(Card)`
-  background: ${props => props.isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.7)'};
-  border: none;
-  transition: transform 0.3s ease;
 
   &:hover {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
     transform: translateY(-5px);
   }
-`;
 
-const StyledBadge = styled(Badge)`
-  background-color: ${props => props.isDarkMode ? '#4CAF50' : '#28a745'};
-  margin-right: 5px;
-`;
+  .article-image {
+    height: 250px;
+    object-fit: cover;
+    width: 100%;
+  }
 
-const StyledButton = styled(Button)`
-  background-color: #4CAF50;
-  color: #fff;
-  padding: 8px 16px;
-  border-radius: 4px;
-  margin-top: 5px;
-  margin-right: 5px;
-  float: right;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 5px;
-  transition: background-color 0.3s ease;
-  border: none;
-  &:hover {
-    background-color: #45a049;
+  .article-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
   }
 `;
 
-const KnowledgeHub = ({ isDarkMode }) => {
-    const [articles, setArticles] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [category, setCategory] = useState('all');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [articlesPerPage] = useState(9);
-    const [loading, setLoading] = useState(false);
+const CategoryBadge = styled.span`
+  background-color: #0a6638;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  margin-right: 10px;
+`;
 
-    useEffect(() => {
-        fetchArticles();
-    }, []);
+const FilterTag = styled.div`
+  background-color: #fffacc;
+  color: #0a6638;
+  padding: 5px 10px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+  margin-bottom: 10px;
+`;
 
-    const fetchArticles = async () => {
-        setLoading(true);
-        try {
-            const response = await getAllArticles();
-            setArticles(response.data.articles);
-        } catch (error) {
-            toast.error('Failed to fetch articles');
-        }
-        setLoading(false);
-    };
+const KnowledgeHub = () => {
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({
+    search: '',
+    categories: [],
+  });
 
-    const handleSearch = (e) => {
-        setSearchTerm(e.target.value);
-        setCurrentPage(1);
-    };
+  const categories = [
+    'Training', 'Health', 'Nutrition', 
+    'Care', 'Behavior', 'Lifestyle'
+  ];
 
-    const handleCategoryChange = (e) => {
-        setCategory(e.target.value);
-        setCurrentPage(1);
-    };
+  const fetchArticles = async () => {
+    try {
+      setLoading(true);
+      const response = await getAllArticles();
+      setArticles(response.data.articles || []);
+    } catch (error) {
+      toast.error('Failed to fetch articles');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const toggleBookmark = async (id, isBookmarked) => {
-        try {
-            if (isBookmarked) {
-                await unbookmarkArticle(id);
-            } else {
-                await bookmarkArticle(id);
-            }
-            fetchArticles(); // Refetch articles to update the bookmarked status
-        } catch (error) {
-            toast.error('Failed to update bookmark');
-        }
-    };
+  useEffect(() => {
+    fetchArticles();
+  }, []);
 
-    // Filter and paginate articles
-    const filteredArticles = articles.filter(article => 
-        (category === 'all' || article.category === category) &&
-        article.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  const filteredArticles = useMemo(() => {
+    return articles.filter(article => {
+      const matchesSearch = !filters.search || 
+        article.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+        article.content.toLowerCase().includes(filters.search.toLowerCase());
+      
+      const matchesCategories = filters.categories.length === 0 || 
+        filters.categories.includes(article.category);
+      
+      return matchesSearch && matchesCategories;
+    });
+  }, [articles, filters]);
 
-    const indexOfLastArticle = currentPage * articlesPerPage;
-    const indexOfFirstArticle = indexOfLastArticle - articlesPerPage;
-    const currentArticles = filteredArticles.slice(indexOfFirstArticle, indexOfLastArticle);
+  const toggleCategory = (category) => {
+    setFilters(prev => ({
+      ...prev,
+      categories: prev.categories.includes(category)
+        ? prev.categories.filter(c => c !== category)
+        : [...prev.categories, category]
+    }));
+  };
 
-    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const removeFilter = (type, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [type]: prev[type].filter(v => v !== value)
+    }));
+  };
 
-    return (
-        <StyledKnowledgeHub isDarkMode={isDarkMode}>
-            <Container>
-                <h1 className="text-center mb-4">Knowledge Hub</h1>
-                <GlassmorphicCard isDarkMode={isDarkMode}>
-                    <Row className="align-items-center">
-                        <Col md={6}>
-                            <InputGroup>
-                                <InputGroup.Text>
-                                    <FaSearch />
-                                </InputGroup.Text>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Search articles..."
-                                    value={searchTerm}
-                                    onChange={handleSearch}
-                                />
-                            </InputGroup>
-                        </Col>
-                        <Col md={6} className="text-md-end mt-3 mt-md-0">
-                            <Form.Select value={category} onChange={handleCategoryChange}>
-                                <option value="all">All Categories</option>
-                                <option value="Care">Care</option>
-                                <option value="Training">Training</option>
-                                <option value="Nutrition">Nutrition</option>
-                                <option value="Adoption">Adoption</option>
-                                <option value="Health">Health</option>
-                                <option value="Lifestyle">Lifestyle</option>
-                            </Form.Select>
-                        </Col>
-                    </Row>
-                </GlassmorphicCard>
+  return (
+    <PageWrapper>
+      <Container>
+        <Row>
+          <Col md={3}>
+            <FilterSidebar>
+              <Card.Body>
+                <h4 className="mb-4" style={{color: '#0a6638'}}>
+                  <FaFilter className="me-2" /> Filters
+                </h4>
+                
+                <Form.Group className="mb-3">
+                  <Form.Label>Search Articles</Form.Label>
+                  <InputGroup>
+                    <Form.Control
+                      type="text"
+                      placeholder="Search..."
+                      value={filters.search}
+                      onChange={(e) => setFilters(prev => ({
+                        ...prev,
+                        search: e.target.value
+                      }))}
+                    />
+                    <InputGroup.Text style={{backgroundColor: '#0a6638', color: '#fff'}}>
+                      <FaSearch />
+                    </InputGroup.Text>
+                  </InputGroup>
+                </Form.Group>
 
-                {loading ? (
-                    <div className="text-center">Loading...</div>
-                ) : filteredArticles.length === 0 ? (
-                    <NoArticlesContainer>
-                        <NoArticlesIcon isDarkMode={isDarkMode} />
-                        <h3>No articles found</h3>
-                    </NoArticlesContainer>
-                ) : (
-                    <>
-                        <Row>
-                            {currentArticles.map(article => (
-                                <Col key={article._id} lg={4} md={6} className="mb-4">
-                                    <StyledCard isDarkMode={isDarkMode}>
-                                        <Card.Img variant="top" src={article.images[0] || 'https://via.placeholder.com/300x200'} />
-                                        <Card.Body>
-                                            <Card.Title>{article.title}</Card.Title>
-                                            <Card.Text dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content.substring(0, 150) + '...') }} />
-                                            <div className="d-flex justify-content-between align-items-center">
-                                                <StyledBadge isDarkMode={isDarkMode}>{article.category}</StyledBadge>
-                                                <Button
-                                                    variant="link"
-                                                    onClick={() => toggleBookmark(article._id, article.isBookmarked)}
-                                                >
-                                                    {article.isBookmarked ? <FaBookmark /> : <FaRegBookmark />}
-                                                </Button>
-                                            </div>
-                                            <StyledButton as={Link} to={`/knowledge-hub-details/${article._id}`} className="w-100 mt-2">
-                                                Read More
-                                            </StyledButton>
-                                        </Card.Body>
-                                    </StyledCard>
-                                </Col>
-                            ))}
-                        </Row>
+                <Form.Group className="mb-3">
+                  <Form.Label>Categories</Form.Label>
+                  {categories.map(category => (
+                    <Form.Check 
+                      key={category}
+                      type="checkbox"
+                      label={category}
+                      checked={filters.categories.includes(category)}
+                      onChange={() => toggleCategory(category)}
+                      style={{color: '#0a6638'}}
+                    />
+                  ))}
+                </Form.Group>
+              </Card.Body>
+            </FilterSidebar>
+          </Col>
+          
+          <Col md={9}>
+            <div className="d-flex align-items-center mb-4">
+              <h1 style={{color: '#0a6638', marginRight: '20px'}}>Knowledge Hub</h1>
+              {filters.categories.length > 0 && (
+                <div className="d-flex">
+                  {filters.categories.map(category => (
+                    <FilterTag key={category}>
+                      {category}
+                      <Button 
+                        variant="link" 
+                        className="p-0 ms-2"
+                        onClick={() => removeFilter('categories', category)}
+                      >
+                        <FaTimes color="#0a6638" />
+                      </Button>
+                    </FilterTag>
+                  ))}
+                </div>
+              )}
+            </div>
 
-                        <Pagination className="justify-content-center mt-4">
-                            <Pagination.Prev
-                                onClick={() => paginate(currentPage - 1)}
-                                disabled={currentPage === 1}
+            <ArticleListContainer>
+              {loading ? (
+                <div className="text-center py-5">
+                  <FaBook size={50} color="#0a6638" />
+                  <p className="mt-3">Loading articles...</p>
+                </div>
+              ) : filteredArticles.length === 0 ? (
+                <div className="text-center py-5">
+                  <FaBook size={50} color="#0a6638" />
+                  <p className="mt-3">No articles found</p>
+                </div>
+              ) : (
+                <Row>
+                  {filteredArticles.map(article => (
+                    <Col md={4} key={article._id} className="mb-4">
+                      <ArticleCard
+                        whileHover={{ scale: 1.02 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <img 
+                          src={article.images?.[0] || profileImage} 
+                          alt={article.title} 
+                          className="article-image"
+                        />
+                        <div className="p-3 article-content">
+                          <div className="d-flex align-items-center mb-2">
+                            <CategoryBadge>{article.category}</CategoryBadge>
+                            <small className="text-muted">
+                              {new Date(article.createdAt).toLocaleDateString()}
+                            </small>
+                          </div>
+                          <h3>{article.title}</h3>
+                          <div 
+                            className="text-muted mb-3 flex-grow-1"
+                            dangerouslySetInnerHTML={{ 
+                              __html: DOMPurify.sanitize(
+                                article.content.substring(0, 200) + '...'
+                              ) 
+                            }}
+                          />
+                          <div className="d-flex justify-content-between align-items-center mt-auto">
+                            <Button 
+                              as={Link} 
+                              to={`/knowledge-hub-details/${article._id}`} 
+                              variant="outline-success"
                             >
-                                <FaChevronLeft />
-                            </Pagination.Prev>
-                            {[...Array(Math.ceil(filteredArticles.length / articlesPerPage)).keys()].map(number => (
-                                <Pagination.Item
-                                    key={number + 1}
-                                    active={number + 1 === currentPage}
-                                    onClick={() => paginate(number + 1)}
-                                >
-                                    {number + 1}
-                                </Pagination.Item>
-                            ))}
-                            <Pagination.Next
-                                onClick={() => paginate(currentPage + 1)}
-                                disabled={currentPage === Math.ceil(filteredArticles.length / articlesPerPage)}
-                            >
-                                <FaChevronRight />
-                            </Pagination.Next>
-                        </Pagination>
-                    </>
-                )}
-            </Container>
-        </StyledKnowledgeHub>
-    );
-};
-
-KnowledgeHub.propTypes = {
-    isDarkMode: PropTypes.bool.isRequired
+                              Read More
+                            </Button>
+                            <div className="text-muted">
+                              By {article.author}
+                            </div>
+                          </div>
+                        </div>
+                      </ArticleCard>
+                    </Col>
+                  ))}
+                </Row>
+              )}
+            </ArticleListContainer>
+          </Col>
+        </Row>
+      </Container>
+    </PageWrapper>
+  );
 };
 
 export default KnowledgeHub;

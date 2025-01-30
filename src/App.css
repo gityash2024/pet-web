@@ -2,21 +2,23 @@ body, html {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-x: hidden;
 }
 
 #root {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  width: 100%; /* Ensure root takes full width */
+  width: 100%;
 }
 
 .app {
   display: flex;
   flex-direction: column;
-  width: 100%; /* Changed from 100vw to 100% */
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  width: 100%;
+  overflow-x: hidden;
+  background-color: #fff;
+  color: #333;
 }
 
 .sticky-header {
@@ -26,7 +28,6 @@ body, html {
   right: 0;
   z-index: 1000;
 }
-
 
 .layout {
   display: flex;
@@ -40,45 +41,28 @@ main {
   max-width: 100%;
 }
 
-.light-mode {
-  background-color: #f8f9fa;
-  color: #212529;
+.btn-primary {
+  background-color: #0a6638 !important;
+  border-color: #0a6638 !important;
 }
 
-.dark-mode {
-  background-color: #212529;
-  color: #f8f9fa;
+.btn-primary:hover {
+  background-color: #085530 !important;
+  border-color: #085530 !important;
 }
 
-.dark-mode .navbar {
-  background-color: #343a40 !important;
-}
-
-.dark-mode .card {
-  background-color: #343a40;
-  color: #f8f9fa;
-}
-
-.dark-mode .form-control {
-  background-color: #495057;
-  color: #f8f9fa;
-}
-
-.dark-mode .form-control::placeholder {
-  color: #adb5bd;
+.highlight-section {
+  background-color: #fffacc;
 }
 
 .content-container {
   width: 100%;
   max-width: 100%;
   padding: 0 15px;
-  /* Remove margin-top from here */
 }
-/* .page-content {
-  margin-top: 56px; 
-} */
-
 
 .footer {
   flex-shrink: 0;
+  background-color: #0a6638;
+  color: #fff;
 }

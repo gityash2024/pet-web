@@ -1,107 +1,90 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, Button, Card, Badge, Tabs, Tab, Modal } from 'react-bootstrap';
-import { FaSearch, FaFilter, FaHeart, FaTimes } from 'react-icons/fa';
+import { Container, Row, Col, Form, Button, Card } from 'react-bootstrap';
+import { FaSearch, FaHeart } from 'react-icons/fa';
 import styled from 'styled-components';
-import { motion, AnimatePresence } from 'framer-motion';
-import PropTypes from 'prop-types';
+import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { getAllPets, getAllAccessories, toggleFavorite } from '../contexts/api';
-
+import profileImage from '../assets/profile.png';
 const StyledSearch = styled.div`
-  background-color: ${props => props.isDarkMode ? '#1a1a1a' : '#f8f9fa'};
-  color: ${props => props.isDarkMode ? '#fff' : '#333'};
   min-height: 100vh;
-  padding: 80px 0;
+  padding: 20px 0;
+  background-color: #f8f9fa;
 `;
 
-const SearchBar = styled.div`
-  background: ${props => props.isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.8)'};
-  backdrop-filter: blur(10px);
-  border-radius: 50px;
-  padding: 10px 20px;
-  margin: 0 auto 30px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
+const SearchSection = styled.div`
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 `;
 
-const FilterSection = styled(motion.div)`
-  background: ${props => props.isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.9)'};
-  backdrop-filter: blur(10px);
-  border-radius: 15px;
+const FilterSection = styled.div`
+  background-color: #fff;
   padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   margin-bottom: 20px;
 `;
 
-const StyledCard = styled(motion(Card))`
-  background: ${props => props.isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.8)'};
-  backdrop-filter: blur(5px);
-  border: none;
-  border-radius: 15px;
+const PetCard = styled(motion.div)`
+  background: #fff;
+  border-radius: 10px;
   overflow: hidden;
-  transition: transform 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  position: relative;
 
-  &:hover {
-    transform: translateY(-5px);
+  img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+  }
+
+  .content {
+    padding: 20px;
   }
 `;
 
-const CardImage = styled(Card.Img)`
-  height: 200px;
-  object-fit: cover;
-`;
-
-const StyledBadge = styled(Badge)`
-  background-color: ${props => props.isDarkMode ? '#4CAF50' : '#28a745'};
-  margin-right: 5px;
-`;
-
-const StyledButton = styled(Button)`
-  background-color: rgba(76, 175, 80, 0.75);
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  transition: all 0.3s ease-in-out;
-  backdrop-filter: blur(5px);
-  border-radius: 12px;
-
-  &:hover {
-    background-color: rgba(69, 160, 73, 0.75);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    transform: translateY(-2px);
-  }
-
-  &:active {
-    transform: translateY(2px);
-  }
-`;
-
-const FavoriteButton = styled(motion.button)`
+const DiscountBadge = styled.div`
   position: absolute;
   top: 10px;
   right: 10px;
-  background: rgba(255, 255, 255, 0.7);
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 1;
+  background-color: #fffacc;
+  color: #0a6638;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 5px;
 `;
 
-const ClearFilterButton = styled(Button)`
-  padding: 2px 5px;
+const VerifiedBadge = styled.div`
+  display: inline-block;
+  background-color: #0a6638;
+  color: #fff;
   font-size: 12px;
-  margin-left: 5px;
+  padding: 3px 6px;
+  border-radius: 5px;
+  margin-left: 10px;
 `;
 
-const Search = ({ isDarkMode }) => {
+const SkeletonCard = styled(motion.div)`
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  height: 100%;
+  
+  .skeleton-img {
+    width: 100%;
+    height: 200px;
+    background: #e9ecef;
+  }
+  
+  .content {
+    padding: 20px;
+  }
+`;
+
+const Search = () => {
   const [activeTab, setActiveTab] = useState('pets');
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
@@ -111,13 +94,11 @@ const Search = ({ isDarkMode }) => {
     location: ''
   });
   const [sortBy, setSortBy] = useState('newest');
-  const [showFilters, setShowFilters] = useState(false);
   const [allItems, setAllItems] = useState([]);
   const [displayedItems, setDisplayedItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [itemsPerPage] = useState(12);
 
   useEffect(() => {
     fetchItems();
@@ -153,14 +134,13 @@ const Search = ({ isDarkMode }) => {
       (filters.location === '' || (item.location && item.location.toLowerCase().includes(filters.location.toLowerCase())))
     );
 
-    // Sort items
     filteredItems.sort((a, b) => {
       if (sortBy === 'price_low_high') return a.price - b.price;
       if (sortBy === 'price_high_low') return b.price - a.price;
-      return new Date(b.createdAt) - new Date(a.createdAt); // newest
+      return new Date(b.createdAt) - new Date(a.createdAt);
     });
 
-    setDisplayedItems(filteredItems.slice(0, page * 12));
+    setDisplayedItems(filteredItems.slice(0, page * itemsPerPage));
   };
 
   const handleSearch = (e) => {
@@ -174,14 +154,6 @@ const Search = ({ isDarkMode }) => {
     setFilters(prevFilters => ({
       ...prevFilters,
       [name]: value
-    }));
-    setPage(1);
-  };
-
-  const clearFilter = (filterName) => {
-    setFilters(prevFilters => ({
-      ...prevFilters,
-      [filterName]: ''
     }));
     setPage(1);
   };
@@ -209,243 +181,209 @@ const Search = ({ isDarkMode }) => {
     setPage(prevPage => prevPage + 1);
   };
 
-  const openItemDetails = (item) => {
-    setSelectedItem(item);
-    setShowModal(true);
-  };
-
   return (
-    <StyledSearch isDarkMode={isDarkMode}>
+    <StyledSearch>
       <Container>
-        <h1 className="text-center mb-4">Find Your Perfect Pet or Accessory</h1>
-        <SearchBar isDarkMode={isDarkMode}>
-          <Form onSubmit={handleSearch}>
-            <Form.Group as={Row} className="mb-3 align-items-center">
-              <Col sm={9}>
-                <Form.Control
-                  type="text"
-                  placeholder="Search for pets, breeds, or accessories..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+        <Row>
+          <Col lg={3}>
+            <FilterSection>
+              <h4>Filter</h4>
+              <div className="mb-3">
+                <Form.Check
+                  type="radio"
+                  id="pets"
+                  label="Pets"
+                  checked={activeTab === 'pets'}
+                  onChange={() => setActiveTab('pets')}
                 />
-              </Col>
-              <Col sm={3}>
-                <StyledButton type="submit" className="w-100">
-                  <FaSearch /> Search
-                </StyledButton>
-              </Col>
-            </Form.Group>
-          </Form>
-        </SearchBar>
-
-        <Tabs
-          activeKey={activeTab}
-          onSelect={(k) => {
-            setActiveTab(k);
-            setPage(1);
-            setDisplayedItems([]);
-          }}
-          className="mb-3"
-        >
-          <Tab eventKey="pets" title="Pet Breeds">
-            <h2>Pet Breeds</h2>
-          </Tab>
-          <Tab eventKey="accessories" title="Pet Accessories">
-            <h2>Pet Accessories</h2>
-          </Tab>
-        </Tabs>
-
-        <Row className="mb-3">
-          <Col md={6}>
-            <Button variant="outline-primary" onClick={() => setShowFilters(!showFilters)}>
-              <FaFilter /> {showFilters ? 'Hide Filters' : 'Show Filters'}
-            </Button>
-          </Col>
-          <Col md={6} className="text-md-end">
-            <Form.Group as={Row}>
-              <Form.Label column sm={6} className="text-md-end">
-                Sort by:
-              </Form.Label>
-              <Col sm={6}>
-                <Form.Select value={sortBy} onChange={handleSortChange}>
-                  <option value="newest">Newest</option>
-                  <option value="price_low_high">Price: Low to High</option>
-                  <option value="price_high_low">Price: High to Low</option>
-                </Form.Select>
-              </Col>
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <AnimatePresence>
-          {showFilters && (
-            <FilterSection
-              isDarkMode={isDarkMode}
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Form>
+                <Form.Check
+                  type="radio"
+                  id="accessories"
+                  label="Accessories"
+                  checked={activeTab === 'accessories'}
+                  onChange={() => setActiveTab('accessories')}
+                />
+              </div>
+              {activeTab === 'pets' && (
+                <Form.Group className="mb-3">
+                  <Form.Label>Category</Form.Label>
+                  <Form.Select name="category" value={filters.category} onChange={handleFilterChange}>
+                    <option value="">All Categories</option>
+                    <option value="Dog">Dog</option>
+                    <option value="Cat">Cat</option>
+                    <option value="Rodents">Rodents</option>
+                    <option value="Reptiles">Reptiles</option>
+                    <option value="Rabbits">Rabbits</option>
+                    <option value="Fish">Fish</option>
+                    <option value="Birds">Birds</option>
+                    <option value="Invertebrates">Invertebrates</option>
+                    <option value="Livestock">Livestock</option>
+                    <option value="Poultry">Poultry</option>
+                    <option value="Horses">Horses</option>
+                  </Form.Select>
+                </Form.Group>
+              )}
+              <Form.Group className="mb-3">
+                <Form.Label>Price Range</Form.Label>
                 <Row>
-                  {activeTab === 'pets' && (
-                    <Col md={3}>
-                      <Form.Group className="mb-3">
-                        <Form.Label>
-                          Category
-                          {filters.category && (
-                            <ClearFilterButton variant="link" onClick={() => clearFilter('category')}>
-                              <FaTimes />
-                            </ClearFilterButton>
-                          )}
-                        </Form.Label>
-                        <Form.Select name="category" value={filters.category} onChange={handleFilterChange}>
-                          <option value="">All Categories</option>
-                          <option value="Dog">Dog</option>
-                          <option value="Cat">Cat</option>
-                          <option value="Fish">Fish</option>
-                        </Form.Select>
-                      </Form.Group>
-                    </Col>
-                  )}
-                  <Col md={3}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>
-                        Min Price
-                        {filters.minPrice && (
-                          <ClearFilterButton variant="link" onClick={() => clearFilter('minPrice')}>
-                            <FaTimes />
-                          </ClearFilterButton>
-                        )}
-                      </Form.Label>
-                      <Form.Control type="number" name="minPrice" value={filters.minPrice} onChange={handleFilterChange} />
-                    </Form.Group>
+                  <Col>
+                    <Form.Control type="number" placeholder="Min" name="minPrice" value={filters.minPrice} onChange={handleFilterChange} />
                   </Col>
-                  <Col md={3}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>
-                        Max Price
-                        {filters.maxPrice && (
-                          <ClearFilterButton variant="link" onClick={() => clearFilter('maxPrice')}>
-                            <FaTimes />
-                          </ClearFilterButton>
-                        )}
-                      </Form.Label>
-                      <Form.Control type="number" name="maxPrice" value={filters.maxPrice} onChange={handleFilterChange} />
-                    </Form.Group>
-                  </Col>
-                  <Col md={3}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>
-                        Location
-                        {filters.location && (
-                          <ClearFilterButton variant="link" onClick={() => clearFilter('location')}>
-                            <FaTimes />
-                          </ClearFilterButton>
-                        )}
-                      </Form.Label>
-                      <Form.Control type="text" name="location" value={filters.location} onChange={handleFilterChange} />
-                    </Form.Group>
+                  <Col>
+                    <Form.Control type="number" placeholder="Max" name="maxPrice" value={filters.maxPrice} onChange={handleFilterChange} />
                   </Col>
                 </Row>
-              </Form>
+              </Form.Group>
+            
+              <Form.Group className="mb-3">
+                <Form.Label>Keyword</Form.Label>
+                <Form.Control type="text" placeholder="Search" />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Type of listing</Form.Label>
+                <div>
+                  <Form.Check
+                    inline
+                    type="checkbox"
+                    id="sale"
+                    label="For sale"
+                  />
+                  <Form.Check
+                    inline
+                    type="checkbox"
+                    id="adoption"
+                    label="For adoption"
+                  />
+                </div>
+                <div>
+                  <Form.Check
+                    inline
+                    type="checkbox"
+                    id="stud"
+                    label="For stud"
+                  />
+                  <Form.Check
+                    inline
+                    type="checkbox"
+                    id="wanted"
+                    label="Wanted"
+                  />
+                </div>
+              </Form.Group>
             </FilterSection>
-          )}
-        </AnimatePresence>
-
-        <Row>
-          {displayedItems.map(item => (
-            <Col key={item._id} lg={3} md={4} sm={6} className="mb-4">
-              <StyledCard isDarkMode={isDarkMode}>
-                <CardImage variant="top" src={item.images[0]} />
-                <FavoriteButton
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => toggleFavoriteItem(item._id)}
-                >
-                  <FaHeart color={item.isFavorite ? "red" : "gray"} />
-                </FavoriteButton>
-                <Card.Body>
-                  <Card.Title>{item.name}</Card.Title>
-                  <Card.Text>
-                    {activeTab === 'pets' && (
-                      <StyledBadge isDarkMode={isDarkMode}>{item.category}</StyledBadge>
-                    )}
-                    <StyledBadge isDarkMode={isDarkMode}>${item.price}</StyledBadge>
-                  </Card.Text>
-                  {activeTab === 'pets' && (
-                    <Card.Text>Breed: {item.breed}</Card.Text>
-                  )}
-                  <StyledButton onClick={() => openItemDetails(item)} className="w-100">View Details</StyledButton>
-                </Card.Body>
-              </StyledCard>
-            </Col>
-          ))}
-        </Row>
-
-        {displayedItems.length === 0 && !loading && (
-          <div className="text-center mt-5">
-            <h3>No items found</h3>
-            <p>Try adjusting your search or filter criteria</p>
-          </div>
-        )}
-
-        {loading && (
-          <div className="text-center mt-4">
-            <div className="spinner-border" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-          </div>
-        )}
-
-        {!loading && displayedItems.length < allItems.length && (
-          <div className="text-center mt-4">
-            <StyledButton onClick={loadMore}>Load More</StyledButton>
-          </div>
-        )}
-      </Container>
-
-      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg" centered>
-        <Modal.Header closeButton>
-          <Modal.Title>{selectedItem?.name}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedItem && (
+          </Col>
+          <Col lg={9}>
+            <SearchSection>
+              <Form onSubmit={handleSearch}>
+                <Row className="align-items-center">
+                  <Col sm={9}>
+                    <Form.Control 
+                      type="text"
+                      placeholder="Search for pets, accessories..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </Col>
+                  <Col sm={3}>
+                    <Button type="submit" variant="success" className="w-100">
+                      <FaSearch className="me-2" />
+                      Search
+                    </Button>
+                  </Col>
+                </Row>
+                <div className="d-flex justify-content-between align-items-center mt-3">
+                  <div>
+                    <strong>19788</strong> Pets &amp; Animals for sale
+                  </div>
+                  <Form.Select value={sortBy} onChange={handleSortChange} className="w-auto">
+                    <option value="newest">Date Published (Newest)</option>
+                    <option value="price_low_high">Price (Low to High)</option>
+                    <option value="price_high_low">Price (High to Low)</option>
+                  </Form.Select>
+                </div>
+              </Form>
+            </SearchSection>
+            
+            <h2 className="my-4">
+              {activeTab === 'pets' ? 'Pet Breeds' : 'Pet Accessories'}
+            </h2>
             <Row>
-              <Col md={6}>
-                <img src={selectedItem.images[0]} alt={selectedItem.name} className="img-fluid rounded" />
-              </Col>
-              <Col md={6}>
-                <p><strong>Price:</strong> ${selectedItem.price}</p>
-                {activeTab === 'pets' && (
-                  <>
-                    <p><strong>Category:</strong> {selectedItem.category}</p>
-                    <p><strong>Breed:</strong> {selectedItem.breed}</p>
-                    <p><strong>Age:</strong> {selectedItem.age} years</p>
-                  </>
-                )}
-                <p><strong>Description:</strong> {selectedItem.description}</p>
-                {activeTab === 'pets' && selectedItem.location && (
-                  <p><strong>Location:</strong> {selectedItem.location}</p>
-                )}
-              </Col>
+              {loading ? (
+                [...Array(8)].map((_, index) => (
+                  <Col md={4} key={index}>
+                    <SkeletonCard>
+                      <div className="skeleton-img" />
+                      <div className="content">
+                        <div className="skeleton-text mb-2" />
+                        <div className="skeleton-text" />
+                      </div>
+                    </SkeletonCard>
+                  </Col>
+                ))
+              ) : (
+                displayedItems.map(item => (
+                  <Col md={4} key={item._id}>
+                    <PetCard
+                      whileHover={{ y: -10 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {item.discount && (
+                        <DiscountBadge>
+                          Get 50% off entry
+                        </DiscountBadge>
+                      )}
+                      <img src={item.images[0]||profileImage} alt={item.name} />
+                      <div className="content">
+                        <div className="d-flex align-items-center mb-2">
+                          <h4>{item.name}</h4>
+                          {activeTab === 'pets' && item.verified && (
+                            <VerifiedBadge>VERIFIED</VerifiedBadge>
+                          )}
+                        </div>
+                        <div className="mb-2">
+                          <strong>£{item.price}</strong>
+                        </div>
+                        {activeTab === 'pets' && (
+                          <>
+                            <div>{item.category}</div>
+                            <div>{item.breed}</div>
+                          </>
+                        )}
+                        <div className="mt-3">
+                          <Button 
+                            variant="outline-success"
+                            href={`/ad/${item._id}`}
+                            className="w-100"
+                          >
+                            View Details
+                          </Button>
+                        </div>
+                      </div>
+                    </PetCard>
+                  </Col>
+                ))
+              )}
             </Row>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>Close</Button>
-          <Button variant="primary" onClick={() => {/* Add contact seller logic here */}}>
-            Contact Seller
-          </Button>
-        </Modal.Footer>
-      </Modal>
+
+            {displayedItems.length === 0 && !loading && (
+              <div className="text-center mt-5">
+                <h3>No items found</h3>
+                <p>Try adjusting your search or filter criteria</p>
+              </div>
+            )}
+
+            {!loading && displayedItems.length < allItems.length && (
+              <div className="text-center mt-4">
+                <Button variant="success" onClick={loadMore}>
+                  Load More
+                </Button>
+              </div>
+            )}
+          </Col>
+        </Row>
+      </Container>
     </StyledSearch>
   );
 };
 
-Search.propTypes = {
-  isDarkMode: PropTypes.bool.isRequired
-};
-
 export default Search;
-          

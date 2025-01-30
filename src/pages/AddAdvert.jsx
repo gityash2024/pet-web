@@ -13,7 +13,7 @@ const StyledAddAdvert = styled.div`
   background-color: ${props => props.isDarkMode ? '#1a1a1a' : '#f8f9fa'};
   color: ${props => props.isDarkMode ? '#fff' : '#333'};
   min-height: 100vh;
-  padding: 80px 0;
+  padding: 20px 0;
   position: relative;
   overflow: hidden;
 

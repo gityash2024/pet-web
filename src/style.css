@@ -1,0 +1,56 @@
+@font-face {
+    font-family: 'Spoof';
+    src: url('../assets/fonts/Spoof-Regular.woff2') format('woff2'),
+         url('../assets/fonts/Spoof-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Spoof';
+    src: url('../assets/fonts/Spoof-Bold.woff2') format('woff2'),
+         url('../assets/fonts/Spoof-Bold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+  }
+  
+  * {
+    font-family: 'Spoof';
+  }
+  
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #0a6638;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #085530;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+  
+  .app {
+    min-height: 100vh;
+    position: relative;
+  }
