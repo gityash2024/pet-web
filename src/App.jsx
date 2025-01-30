@@ -18,6 +18,7 @@ import './App.css';
 import './style.css';
 import ToastContainer from './components/Toast/ToastContainer';
 import ScrollToTop from './components/ScrollToTopButton';
+import NotFound from './components/NotFound';
 
 function AppRoutes() {
   const navigate = useNavigate();
@@ -44,7 +45,10 @@ function AppRoutes() {
           <Route path="/messages" element={<Messages />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/knowledge-hub" element={<KnowledgeHub />} />
+
           <Route path="/knowledge-hub-details/:id" element={<KnowledgeDetails />} />
+          <Route path="*" element={<NotFound />} /> 
+
         </Routes>
         {/* Move ScrollToTop component outside of Routes */}
       </Layout>

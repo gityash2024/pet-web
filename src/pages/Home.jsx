@@ -124,7 +124,24 @@ const Home = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
-
+  const handleViewDetails = (pet) => {
+    navigate(`/ad/${pet._id}`, { 
+      state: { 
+        advert: {
+          _id: pet._id,
+          title: pet.name,
+          category: pet.category,
+          breed: pet.breed,
+          location: pet.location,
+          price: pet.price,
+          description: pet.description,
+          age: pet.age,
+          owner: pet.owner,
+          images: [pet.images[0] || cardImage]
+        } 
+      } 
+    });
+   };
   useEffect(() => {
     fetchFeaturedPets();
   }, []);
@@ -271,15 +288,14 @@ const Home = () => {
           <div className="content">
             <h3>{pet.name}</h3>
             <p>{pet.breed}</p>
-            <p>£{pet.price}</p>
+            <p>₹{pet.price}</p>
             <Button 
-              variant="outline-success" 
-              as={Link} 
-              to={`/ad/${pet._id}`}
-              className="w-100"
-            >
-              View Details
-            </Button>
+ variant="outline-success" 
+ onClick={() => handleViewDetails(pet)}
+ className="w-100"
+>
+ View Details
+</Button>
           </div>
         </PetCard>
       </Col>

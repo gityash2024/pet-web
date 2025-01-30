@@ -1,200 +1,91 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Container, Row, Col, Form, Button, ListGroup, Badge, Image, Dropdown } from 'react-bootstrap';
-import { FaPaperPlane, FaUser, FaCopy, FaReply, FaEllipsisV, FaInbox } from 'react-icons/fa';
-import styled from 'styled-components';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Box, Typography, Paper, Grid, TextField, Button, IconButton, Avatar, Badge } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import SendIcon from '@mui/icons-material/Send';
+import SearchIcon from '@mui/icons-material/Search';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import ReplyIcon from '@mui/icons-material/Reply';
 import { getUserMessages, sendMessage, markMessageAsRead } from '../contexts/api';
-import { useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-const StyledMessages = styled.div`
-  background-color: #f4f4f4;
-  color: #333;
-  min-height: 100vh;
-  padding: 20px 0;
-
-  @media (max-width: 767px) {
-    padding: 60px 20px;
+const MainContainer = styled(Box)(({ theme }) => ({
+  backgroundColor: '#f4f4f4',
+  minHeight: '100vh',
+  padding: theme.spacing(3),
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(1),
   }
-`;
+}));
 
-const MessengerContainer = styled.div`
-  background: #fff;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e0e0e0;
-  display: flex;
-  height: 80vh;
-
-  @media (max-width: 767px) {
-    border-radius: 0;
-    box-shadow: none;
-    border: none;
-    height: auto;
-    flex-direction: column;
+const MessagesContainer = styled(Paper)(({ theme }) => ({
+  display: 'flex',
+  height: 'calc(100vh - 100px)',
+  overflow: 'hidden',
+  borderRadius: theme.shape.borderRadius,
+  [theme.breakpoints.down('sm')]: {
+    flexDirection: 'column',
+    height: 'calc(100vh - 80px)',
   }
-`;
+}));
 
-const ConversationList = styled.div`
-  background-color: #f4f4f4;
-  width: 30%;
-  border-right: 1px solid #e0e0e0;
-  overflow-y: auto;
-
-  &::-webkit-scrollbar {
-    width: 6px;
+const ConversationsList = styled(Box)(({ theme }) => ({
+  width: '30%',
+  borderRight: `1px solid ${theme.palette.divider}`,
+  overflow: 'auto',
+  backgroundColor: '#fff',
+  [theme.breakpoints.down('sm')]: {
+    width: '100%',
+    height: '40%',
+    borderRight: 'none',
+    borderBottom: `1px solid ${theme.palette.divider}`,
   }
+}));
 
-  &::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 3px;
+const ConversationItem = styled(Box)(({ theme, selected }) => ({
+  padding: theme.spacing(2),
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  borderBottom: `1px solid ${theme.palette.divider}`,
+  backgroundColor: selected ? '#fffacc' : '#fff',
+  '&:hover': {
+    backgroundColor: selected ? '#fffacc' : '#f5f5f5',
   }
+}));
 
-  @media (max-width: 767px) {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid #e0e0e0;
-    max-height: 300px;
-  }
-`;
+const ChatArea = styled(Box)({
+  flexGrow: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%'
+});
 
-const ConversationItem = styled(ListGroup.Item)`
-  background: #fff;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  padding: 15px;
-  border-bottom: 1px solid #e0e0e0;
+const MessagesArea = styled(Box)(({ theme }) => ({
+  flexGrow: 1,
+  padding: theme.spacing(2),
+  overflow: 'auto',
+  backgroundColor: '#fff'
+}));
 
-  &:hover {
-    background: #f4f4f4;
-    transform: translateY(-2px);
-  }
+const MessageBubble = styled(Box)(({ theme, sent }) => ({
+  maxWidth: '70%',
+  padding: theme.spacing(1, 2),
+  borderRadius: '15px',
+  marginBottom: theme.spacing(1),
+  alignSelf: sent ? 'flex-end' : 'flex-start',
+  backgroundColor: sent ? '#0a6638' : '#fffacc',
+  color: sent ? '#fff' : '#000',
+  position: 'relative'
+}));
 
-  &.active {
-    background: #fffacc !important;
-  }
-
-  @media (max-width: 767px) {
-    padding: 10px;
-  }
-`;
-
-const MessageArea = styled.div`
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-`;
-
-const MessageList = styled.div`
-  flex-grow: 1;
-  overflow-y: auto;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 3px;
-  }
-
-  @media (max-width: 767px) {
-    padding: 15px;
-  }
-`;
-
-const Message = styled(motion.div)`
-  max-width: 70%;
-  padding: 12px 18px;
-  border-radius: 20px;
-  margin-bottom: 15px;
-  word-wrap: break-word;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  position: relative;
-  align-self: ${props => props.sent ? 'flex-end' : 'flex-start'};
-
-  ${props =>
-    props.sent
-      ? `
-    background-color: #0a6638;
-    color: white;
-    border-bottom-right-radius: 0;
-  `
-      : `
-    background-color: #fffacc;
-    border-bottom-left-radius: 0;
-  `}
-
-  @media (max-width: 767px) {
-    max-width: 80%;
-  }
-`;
-
-const MessageActions = styled(Dropdown)`
-  position: absolute;
-  top: 5px;
-  right: 5px;
-`;
-
-const StyledForm = styled(Form)`
-  background: #fff;
-  padding: 20px;
-  border-top: 1px solid #e0e0e0;
-  display: flex;
-  align-items: center;
-
-  @media (max-width: 767px) {
-    padding: 15px;
-  }
-`;
-
-const StyledButton = styled(Button)`
-  background-color: #0a6638;
-  border: none;
-  padding: 10px 20px;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background-color: #085530;
-    transform: translateY(-2px);
-  }
-
-  @media (max-width: 767px) {
-    padding: 8px 16px;
-  }
-`;
-
-const SearchBox = styled(Form.Control)`
-  background-color: #f4f4f4;
-  border: 1px solid #e0e0e0;
-  color: #333;
-
-  &::placeholder {
-    color: rgba(0, 0, 0, 0.5);
-  }
-`;
-
-const UserAvatar = styled(Image)`
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  margin-right: 15px;
-`;
-
-const ArticleDetails = styled.div`
-  background-color: #fffacc;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 15px;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-`;
+const InputArea = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(2),
+  backgroundColor: '#fff',
+  borderTop: `1px solid ${theme.palette.divider}`
+}));
 
 const Messages = () => {
   const [conversations, setConversations] = useState([]);
@@ -202,262 +93,282 @@ const Messages = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const messageListRef = useRef(null);
-  const location = useLocation();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedMessage, setSelectedMessage] = useState(null);
+  const messagesEndRef = useRef(null);
   const currentUser = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
-    fetchUserMessages();
-    if (location.state && location.state.conversationId) {
-      handleConversationSelect(location.state.conversationId);
-    }
-    const intervalId = setInterval(fetchUserMessages, 5000); // Poll every 5 seconds
-    return () => clearInterval(intervalId);
-  }, [location]);
+    fetchMessages();
+    const interval = setInterval(fetchMessages, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
-    if (messageListRef.current) {
-      messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
-    }
+    scrollToBottom();
   }, [messages]);
 
-  const fetchUserMessages = async () => {
+  const fetchMessages = async () => {
     try {
       const response = await getUserMessages();
-      const groupedConversations = response.data.messages.reduce((acc, message) => {
-        const otherUser = message.sender._id === currentUser._id ? message.recipient : message.sender;
-        if (otherUser._id === currentUser._id) return acc; // Skip self-messages
-        const key = `${otherUser._id}-${message.advert._id}`;
-        if (!acc[key]) {
-          acc[key] = {
-            _id: key,
-            otherUser,
-            advert: message.advert,
-            lastMessage: message,
-            unreadCount: message.read || message.sender._id === currentUser._id ? 0 : 1,
-            messages: [message]
-          };
-        } else {
-          acc[key].lastMessage = message;
-          acc[key].messages.push(message);
-          if (!message.read && message.sender._id !== currentUser._id) {
-            acc[key].unreadCount += 1;
-          }
-        }
-        return acc;
-      }, {});
+      const groupedConversations = groupMessagesByConversation(response.data.messages);
       setConversations(Object.values(groupedConversations));
-
-      // Update messages if a conversation is selected
+      
       if (selectedConversation) {
-        const updatedConversation = Object.values(groupedConversations).find(c => c._id === selectedConversation._id);
+        const updatedConversation = Object.values(groupedConversations).find(
+          c => c._id === selectedConversation._id
+        );
         if (updatedConversation) {
           setMessages(updatedConversation.messages);
           setSelectedConversation(updatedConversation);
         }
       }
     } catch (error) {
-      console.error('Error fetching user messages:', error);
       toast.error('Failed to fetch messages');
     }
   };
 
-  const handleConversationSelect = (conversationId) => {
-    const conversation = conversations.find(c => c._id === conversationId);
-    setSelectedConversation(conversation);
-    setMessages(conversation?.messages || []);
-    conversation?.messages.forEach(message => {
-      if (!message?.read && message?.sender?._id !== currentUser?._id) {
-        markMessageAsRead(message?._id);
+  const groupMessagesByConversation = (messages) => {
+    return messages.reduce((acc, message) => {
+      const otherUser = message.sender._id === currentUser._id ? message.recipient : message.sender;
+      if (otherUser._id === currentUser._id) return acc;
+      
+      const key = `${otherUser._id}-${message.advert._id}`;
+      if (!acc[key]) {
+        acc[key] = {
+          _id: key,
+          otherUser,
+          advert: message.advert,
+          lastMessage: message,
+          unreadCount: message.read || message.sender._id === currentUser._id ? 0 : 1,
+          messages: [message]
+        };
+      } else {
+        acc[key].lastMessage = message;
+        acc[key].messages.push(message);
+        if (!message.read && message.sender._id !== currentUser._id) {
+          acc[key].unreadCount += 1;
+        }
       }
-    });
+      return acc;
+    }, {});
   };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (newMessage.trim() && selectedConversation) {
-      try {
-        const messageData = {
-          advertId: selectedConversation.advert._id,
-          recipientId: selectedConversation.otherUser._id,
-          content: newMessage.trim()
+    if (!newMessage.trim() || !selectedConversation) return;
+
+    try {
+      const response = await sendMessage({
+        advertId: selectedConversation.advert._id,
+        recipientId: selectedConversation.otherUser._id,
+        content: newMessage.trim()
+      });
+
+      const sentMessage = {
+        ...response.data.message,
+        sender: { _id: currentUser._id, name: currentUser.name },
+        recipient: selectedConversation.otherUser
+      };
+
+      setMessages(prev => [...prev, sentMessage]);
+      setNewMessage('');
+      updateConversationsList(sentMessage);
+    } catch (error) {
+      toast.error('Failed to send message');
+    }
+  };
+
+  const updateConversationsList = (newMessage) => {
+    setConversations(prev => {
+      const updated = [...prev];
+      const index = updated.findIndex(c => c._id === selectedConversation._id);
+      if (index !== -1) {
+        updated[index] = {
+          ...updated[index],
+          lastMessage: newMessage,
+          messages: [...updated[index].messages, newMessage]
         };
-        const response = await sendMessage(messageData);
-        const sentMessage = {
-          ...response.data.message,
-          sender: { _id: currentUser._id, name: currentUser.name },
-          recipient: selectedConversation.otherUser
-        };
-        setMessages(prevMessages => [...prevMessages, sentMessage]);
-        setNewMessage('');
-        // Update the conversation list
-        setConversations(prevConversations => {
-          const updatedConversations = [...prevConversations];
-          const index = updatedConversations.findIndex(c => c._id === selectedConversation._id);
-          if (index !== -1) {
-            updatedConversations[index] = {
-              ...updatedConversations[index],
-              lastMessage: sentMessage,
-              messages: [...updatedConversations[index].messages, sentMessage]
-            };
-          }
-          return updatedConversations;
-        });
-      } catch (error) {
-        console.error('Error sending message:', error);
-        toast.error('Failed to send message');
       }
-    }
+      return updated;
+    });
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage(e);
-    }
+  const handleConversationSelect = async (conversation) => {
+    setSelectedConversation(conversation);
+    setMessages(conversation.messages);
+    
+    conversation.messages.forEach(message => {
+      if (!message.read && message.sender._id !== currentUser._id) {
+        markMessageAsRead(message._id);
+      }
+    });
   };
 
-  const handleCopyMessage = (content) => {
-    navigator.clipboard.writeText(content);
-    toast.info('Message copied to clipboard');
+  const handleMessageOptions = (event, message) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedMessage(message);
   };
 
-  const handleReplyMessage = (content) => {
-    setNewMessage(`Reply to: "${content.substring(0, 30)}..."\n\n`);
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+    setSelectedMessage(null);
   };
 
-  const filteredConversations = conversations.filter(conversation =>
-    conversation.otherUser.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    conversation.advert.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleCopyMessage = () => {
+    navigator.clipboard.writeText(selectedMessage.content);
+    toast.success('Message copied to clipboard');
+    handleCloseMenu();
+  };
 
-  const capitalizeFirstLetter = (string) => {
-    return string?.charAt(0)?.toUpperCase() + string?.slice(1);
+  const handleReplyMessage = () => {
+    setNewMessage(`Reply to: "${selectedMessage.content.substring(0, 30)}..."\n`);
+    handleCloseMenu();
+  };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
-    <StyledMessages>
-      <Container fluid>
-        {/* <h1 className="text-center mb-4" style={{ color: '#0a6638' }}>Messages</h1> */}
-        <MessengerContainer>
-          <ConversationList>
-            <div className="p-3">
-              <SearchBox
-                type="text"
-                placeholder="Search conversations..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <ListGroup>
-              {filteredConversations.map(conversation => (
-                <ConversationItem
-                  key={conversation._id}
-                  active={selectedConversation && selectedConversation._id === conversation._id}
-                  onClick={() => handleConversationSelect(conversation._id)}
-                >
-                  <div className="d-flex align-items-center justify-content-between">
-                    <div className="d-flex align-items-center">
-                      <UserAvatar src={`https://i.pravatar.cc/150?u=${conversation.otherUser._id}`} alt={conversation.otherUser.name} />
-                      <div>
-                        <h6 className="mb-0">{capitalizeFirstLetter(conversation.otherUser.name)}</h6>
-                        <small className="text-muted">{conversation.advert.title}</small>
-                      </div>
-                    </div>
-                    <div>
-                      <Badge bg="primary">{conversation.messages.length}</Badge>
-                      {conversation.unreadCount > 0 && (
-                        <Badge bg="danger" className="ml-2">{conversation.unreadCount}</Badge>
-                      )}
-                    </div>
-                  </div>
-                </ConversationItem>
-              ))}
-            </ListGroup>
-          </ConversationList>
-          <MessageArea>
-            {selectedConversation ? (
-              <>
-                <div className="p-4 border-bottom d-flex align-items-center justify-content-between" style={{ backgroundColor: '#fffacc' }}>
-                  <div className="d-flex align-items-center">
-                    <UserAvatar src={`https://i.pravatar.cc/150?u=${selectedConversation.otherUser._id}`} alt={selectedConversation.otherUser.name} />
-                    <div>
-                      <h5 className="mb-0">{capitalizeFirstLetter(selectedConversation.otherUser.name)}</h5>
-                      <small>{selectedConversation.advert.title}</small>
-                    </div>
-                  </div>
-                  <Badge bg="primary">{messages.length} messages</Badge>
-                </div>
-                <MessageList ref={messageListRef}>
-                  <ArticleDetails>
-                    <h6>Article: {selectedConversation.advert.title}</h6>
-                  </ArticleDetails>
-                  <AnimatePresence>
-                    {messages.length > 0 ? messages.map(message => (
-                      <Message
-                        key={message._id}
-                        sent={message.sender._id === currentUser._id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
+    <MainContainer>
+      <MessagesContainer elevation={3}>
+        <ConversationsList>
+          <Box p={2}>
+            <TextField
+              fullWidth
+              size="small"
+              placeholder="Search conversations..."
+              InputProps={{
+                startAdornment: <SearchIcon color="action" />
+              }}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </Box>
+          {conversations
+            .filter(conv => 
+              conv.otherUser.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              conv.advert.title.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+            .map(conversation => (
+              <ConversationItem
+                key={conversation._id}
+                selected={selectedConversation?._id === conversation._id}
+                onClick={() => handleConversationSelect(conversation)}
+              >
+                <Badge badgeContent={conversation.unreadCount} color="error">
+                  <Avatar src={`https://i.pravatar.cc/150?u=${conversation.otherUser._id}`} />
+                </Badge>
+                <Box ml={2} flexGrow={1}>
+                  <Typography variant="subtitle1">
+                    {conversation.otherUser.name}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary" noWrap>
+                    {conversation.advert.title}
+                  </Typography>
+                </Box>
+              </ConversationItem>
+            ))}
+        </ConversationsList>
+
+        <ChatArea>
+          {selectedConversation ? (
+            <>
+              <Box p={2} bgcolor="#fffacc">
+                <Grid container alignItems="center" spacing={2}>
+                  <Grid item>
+                    <Avatar src={`https://i.pravatar.cc/150?u=${selectedConversation.otherUser._id}`} />
+                  </Grid>
+                  <Grid item xs>
+                    <Typography variant="h6">
+                      {selectedConversation.otherUser.name}
+                    </Typography>
+                    <Typography variant="body2">
+                      {selectedConversation.advert.title}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+
+              <MessagesArea>
+                {messages.map((message) => (
+                  <MessageBubble
+                    key={message._id}
+                    sent={message.sender._id === currentUser._id}
+                  >
+                    <Typography variant="body1">{message.content}</Typography>
+                    <Typography variant="caption" color="textSecondary">
+                      {new Date(message.createdAt).toLocaleTimeString()}
+                    </Typography>
+                    <IconButton
+                      size="small"
+                      sx={{ position: 'absolute', right: 0, top: 0 }}
+                      onClick={(e) => handleMessageOptions(e, message)}
+                    >
+                      <MoreVertIcon fontSize="small" />
+                    </IconButton>
+                  </MessageBubble>
+                ))}
+                <div ref={messagesEndRef} />
+              </MessagesArea>
+
+              <InputArea>
+                <form onSubmit={handleSendMessage}>
+                  <Grid container spacing={2}>
+                    <Grid item xs>
+                      <TextField
+                        fullWidth
+                        multiline
+                        maxRows={4}
+                        placeholder="Type a message..."
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                      />
+                    </Grid>
+                    <Grid item>
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        disabled={!newMessage.trim()}
+                        sx={{ backgroundColor: '#0a6638', height: '100%' }}
                       >
-                        <strong>{capitalizeFirstLetter(message.sender._id === currentUser._id ? currentUser.name : selectedConversation.otherUser.name)}</strong>
-                        <p>{message.content}</p>
-                        <div>
-                          <small>{new Date(message.createdAt).toLocaleTimeString()}</small>
-                        </div>
-                        <MessageActions>
-                          <Dropdown.Toggle variant="link" size="sm">
-                            <FaEllipsisV />
-                          </Dropdown.Toggle>
-                          <Dropdown.Menu>
-                            <Dropdown.Item onClick={() => handleCopyMessage(message.content)}>
-                              <FaCopy /> Copy
-                            </Dropdown.Item>
-                            <Dropdown.Item onClick={() => handleReplyMessage(message.content)}>
-                              <FaReply /> Reply
-                            </Dropdown.Item>
-                          </Dropdown.Menu>
-                        </MessageActions>
-                      </Message>
-                    )) : (
-                        <div className="text-center mt-5">
-                          <FaInbox size={50} color="#0a6638" />
-                          <p>No messages found</p>
-                        </div>
-                      )}
-                    </AnimatePresence>
-                  </MessageList>
-                  <StyledForm onSubmit={handleSendMessage}>
-                    <Row className="w-100 m-0 align-items-center">
-                      <Col className="p-0">
-                        <Form.Control
-                          as="textarea"
-                          rows={1}
-                          placeholder="Type a message..."
-                          value={newMessage}
-                          onChange={(e) => setNewMessage(e.target.value)}
-                          onKeyPress={handleKeyPress}
-                        />
-                      </Col>
-                      <Col xs="auto" className="p-0 pl-2">
-                        <StyledButton type="submit">
-                          <FaPaperPlane /> Send
-                        </StyledButton>
-                      </Col>
-                    </Row>
-                  </StyledForm>
-                </>
-              ) : (
-                <div className="h-100 d-flex justify-content-center align-items-center">
-                  <h4>Select a conversation to start messaging</h4>
-                </div>
-              )}
-            </MessageArea>
-          </MessengerContainer>
-        </Container>
-      </StyledMessages>
-    );
-  };
-  
-  export default Messages;
+                        <SendIcon />
+                      </Button>
+                    </Grid>
+                  </Grid>
+                </form>
+              </InputArea>
+            </>
+          ) : (
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              height="100%"
+            >
+              <Typography variant="h6" color="textSecondary">
+                Select a conversation to start messaging
+              </Typography>
+            </Box>
+          )}
+        </ChatArea>
+      </MessagesContainer>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleCloseMenu}
+      >
+        <MenuItem onClick={handleCopyMessage}>
+          <ContentCopyIcon fontSize="small" sx={{ mr: 1 }} /> Copy
+        </MenuItem>
+        <MenuItem onClick={handleReplyMessage}>
+          <ReplyIcon fontSize="small" sx={{ mr: 1 }} /> Reply
+        </MenuItem>
+      </Menu>
+    </MainContainer>
+  );
+};
+
+export default Messages;
