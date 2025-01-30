@@ -77,8 +77,8 @@ const Footer = () => {
               <ul>
                 <li><Link to="/about">About Us</Link></li>
                 <li><Link to="/contact">Contact Us</Link></li>
-                <li><Link to="/press">Press</Link></li>
-                <li><Link to="/careers">Careers</Link></li>
+                {/* <li><Link to="/press">Press</Link></li>
+                <li><Link to="/careers">Careers</Link></li> */}
               </ul>
               <SocialLinks>
                 <a href="https://facebook.com" target="_blank" rel="noopener noreferrer"><FaFacebook /></a>

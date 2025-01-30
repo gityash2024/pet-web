@@ -20,6 +20,10 @@ import './style.css';
 import ToastContainer from './components/Toast/ToastContainer';
 import ScrollToTop from './components/ScrollToTopButton';
 import NotFound from './components/NotFound';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsAndConditions from './components/TermsAndConditions';
+import ContactUs from './components/ContactUs';
+import AboutUs from './components/AboutUs';
 
 function AppRoutes() {
   const navigate = useNavigate();
@@ -47,6 +51,12 @@ function AppRoutes() {
           <Route path="/messages" element={<Messages />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/knowledge-hub" element={<KnowledgeHub />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsAndConditions />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/contact" element={<ContactUs />} />
+
+
 
           <Route path="/knowledge-hub-details/:id" element={<KnowledgeDetails />} />
           <Route path="*" element={<NotFound />} /> 
