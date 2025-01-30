@@ -260,7 +260,7 @@ const LoginModal = ({ show, handleClose, isDarkMode, onLoginSuccess }) => {
          response = await verifyOTP({ phoneNumber, otp });
        }
      } else {
-       if (!name || !email || !password || !phoneNumber) {
+       if (!name || !email || !password ) {
          throw new Error('All fields are required');
        }
        if (!validateEmail(email)) {

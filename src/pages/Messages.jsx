@@ -109,6 +109,10 @@ const Messages = () => {
   }, [messages]);
 
   const fetchMessages = async () => {
+    if (!localStorage.getItem('token')) {
+      toast.error('Please login to view messages');
+      return;
+    }
     try {
       const response = await getUserMessages();
       const groupedConversations = groupMessagesByConversation(response.data.messages);

@@ -11,7 +11,13 @@ import {toast} from 'react-toastify';
 const StyledContainer = styled(Container)`
   margin-top: 80px;
 `;
-
+const StyledListGroupItem = styled(ListGroup.Item)`
+  &.active {
+    background-color: #0a6638 !important;
+    border-color: #0a6638 !important;
+    color: #ffffff !important;
+  }
+`;
 const ProfileImage = styled(Image)`
   width: 150px;
   height: 150px;
@@ -110,11 +116,11 @@ const Profile = ({ isDarkMode }) => {
               )}
             </Card.Body>
             <ListGroup variant="flush">
-              <ListGroup.Item action href="/profile" active>My Account</ListGroup.Item>
-              <ListGroup.Item action onClick={() => navigate('/add-advert', { state: { tab: 'my-adverts' } })}>My Adverts</ListGroup.Item>
-              <ListGroup.Item action onClick={() => navigate('/add-advert', { state: { tab: 'favourite-adverts' } })}>Favourite Adverts</ListGroup.Item>
-              <ListGroup.Item action onClick={handleLogout}>Log Out</ListGroup.Item>
-            </ListGroup>
+  <StyledListGroupItem action href="/profile" active>My Account</StyledListGroupItem>
+  <StyledListGroupItem action onClick={() => navigate('/add-advert', { state: { tab: 'my-adverts' } })}>My Adverts</StyledListGroupItem>
+  <StyledListGroupItem action onClick={() => navigate('/add-advert', { state: { tab: 'favourite-adverts' } })}>Favourite Adverts</StyledListGroupItem>
+  <StyledListGroupItem action onClick={handleLogout}>Log Out</StyledListGroupItem>
+</ListGroup>
           </Card>
         </Col>
         <Col md={9} className='mb-4'>

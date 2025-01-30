@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { startConversation } from '../contexts/api';
 
 const StyledAdDetails = styled.div`
   background-color: #f8f9fa;
@@ -63,14 +64,23 @@ const AdDetails = () => {
     return null;
   }
 
-  const handleStartConversation = () => {
+  const handleStartConversation = async () => {
     if (!localStorage.getItem('token')) {
       toast.error('Please login to start a conversation');
       return;
     }
-    navigate('/messages');
+    try {
+      const response = await startConversation(ad._id);
+      if (response.status === 200 || response.status === 201) {
+        navigate('/messages', { state: { conversationId: response.data.conversationId } });
+      } else {
+        toast.error('Failed to start conversation. Please try again.');
+      }
+    } catch (err) {
+      console.error('Error starting conversation:', err);
+      toast.error('Failed to start conversation. Please try again.');
+    }
   };
-
   return (
     <StyledAdDetails>
       <Container>
