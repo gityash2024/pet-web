@@ -61,10 +61,9 @@ export const deleteAdvert = (id) => {
   return instance.delete(`${baseUrl}adverts/${id}`);
 };
 
-export const startConversation = (advertId) => {
+export const startConversation = (advertId,) => {
   return instance.post(`${baseUrl}messages/start-conversation`, { advertId });
 };
-
 export const sendMessage = (data) => {
   return instance.post(`${baseUrl}messages`, data);
 };

@@ -133,7 +133,7 @@ const Search = () => {
   };
 
   const handleViewDetails = (item) => {
-    navigate(`/ad/${item._id}`, { state: { advert: item } });
+    navigate(`/ad/viewDetails/${item._id}`, { state: { advert: item } });
   };
 
   return (

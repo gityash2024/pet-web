@@ -4,6 +4,7 @@ import { ThemeProvider } from 'react-bootstrap';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import Search from './pages/Search';
+import AdviewDetails from './pages/AdviewDetails';
 import AdDetails from './pages/AdDetails';
 import AddAdvert from './pages/AddAdvert';
 import Messages from './pages/Messages';
@@ -41,6 +42,7 @@ function AppRoutes() {
           <Route path="/" element={<Home />} />
           <Route path="/search" element={<Search />} />
           <Route path="/ad/:id" element={<AdDetails />} />
+          <Route path="/ad/viewDetails/:id" element={<AdviewDetails />} />
           <Route path="/add-advert" element={<AddAdvert />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/profile" element={<Profile />} />

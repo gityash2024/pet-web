@@ -325,13 +325,13 @@ const LoginModal = ({ show, handleClose, isDarkMode, onLoginSuccess }) => {
 
                {!showOtpInput && (
                  <>
-                   <SocialLoginButton isDarkMode={isDarkMode} onClick={() => {}}>
+                   {/* <SocialLoginButton isDarkMode={isDarkMode} onClick={() => {}}>
                      <FaGoogle /> Continue with Google
                    </SocialLoginButton>
 
                    <Divider isDarkMode={isDarkMode}>
                      <span>or</span>
-                   </Divider>
+                   </Divider> */}
 
                    {isLogin && (
                      <AuthOption>
