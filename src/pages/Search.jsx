@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { getAllPets, getAllAccessories } from '../contexts/api';
+import { getAllPets, getAllAccessories, getAllCategories } from '../contexts/api';
 import profileImage from '../assets/profile.png';
 
 const StyledSearch = styled.div`
@@ -99,7 +99,20 @@ const Search = () => {
   });
   const [sortBy, setSortBy] = useState('newest');
   const [loading, setLoading] = useState(false);
-
+    const [categories,setCategories]= useState([]);
+  
+ useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getAllCategories();
+        setCategories(response.data.categories || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        toast.error('Failed to load categories');
+      }
+    };
+    fetchCategories();
+  },[])
   useEffect(() => {
     fetchItems();
   }, [activeTab]);
@@ -164,10 +177,12 @@ const Search = () => {
                 <Form.Group className="mb-3">
                   <Form.Label>Category</Form.Label>
                   <Form.Select name="category" value={filters.category} onChange={handleFilterChange}>
-                    <option value="">All Categories</option>
-                    <option value="Dog">Dog</option>
-                    <option value="Cat">Cat</option>
-                    <option value="Fish">Fish</option>
+                    <option value="">All</option>
+                    {categories.map((category) => (
+                      <option key={category._id} value={category._id}>
+                        {category.name}
+                      </option>
+                    ))}
                   </Form.Select>
                 </Form.Group>
               )}
