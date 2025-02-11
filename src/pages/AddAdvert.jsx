@@ -10,6 +10,7 @@ import Loader from '../components/Loader/Loader';
 import { toast } from 'react-toastify';
 import profileImage from '../assets/profile.png';
 import { FaThLarge, FaList, FaCalendar } from 'react-icons/fa';
+import { Delete, Edit } from 'lucide-react';
 
 const StyledAddAdvert = styled.div`
   min-height: 100vh;
@@ -670,14 +671,14 @@ const AddAdvert = ({ isDarkMode }) => {
                   </span>
                   {activeTab === 'user' && (
                     <div className="action-icons">
-                      <FaEdit 
+                      <Edit 
                         className="icon" 
                         onClick={(e) => {
                           e.stopPropagation();
                           handleEdit(ad);
                         }}
                       />
-                      <FaTrash 
+                      <Delete 
                         className="icon delete" 
                         onClick={(e) => {
                           e.stopPropagation();
@@ -696,7 +697,7 @@ const AddAdvert = ({ isDarkMode }) => {
                 </p>
                 <p className="card-description">{ad.description}</p>
                 <div className="card-footer">
-                  <span className="card-price">₹{ad.price}</span>
+                  <span className="card-price">₹ {ad.price}</span>
                   <Button 
                     variant="outline-success" 
                     size="sm"
@@ -737,7 +738,7 @@ const AddAdvert = ({ isDarkMode }) => {
                     </span>
                   </div>
                 </div>
-                <div className="price">₹{ad.price}</div>
+                <div className="price">₹ {ad.price}</div>
               </div>
               <p className="description">{ad.description}</p>
               <div className="actions">

@@ -103,7 +103,7 @@ const AdDetails = () => {
               <h1>{ad.name}</h1>
               <div className="mb-3">
                 <StyledBadge>{ad.category}</StyledBadge>
-                <StyledBadge>₹{ad.price}</StyledBadge>
+                <StyledBadge>₹ {ad.price}</StyledBadge>
               </div>
               <ContactInfo>
                 <FaMapMarkerAlt />

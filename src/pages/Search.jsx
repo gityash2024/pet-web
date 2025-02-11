@@ -252,7 +252,7 @@ const Search = () => {
                           )}
                         </div>
                         <div className="mb-2">
-                          <strong>₹{item.price}</strong>
+                          <strong>₹ {item.price}</strong>
                         </div>
                         <div>{item.category}</div>
                         <div>{item.breed}</div>

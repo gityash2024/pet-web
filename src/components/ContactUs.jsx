@@ -4,6 +4,20 @@ import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock } from 'react-icons/fa';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
+const Spinner = styled.div`
+  border: 2px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 2px solid #ffffff;
+  width: 20px;
+  height: 20px;
+  margin-left: 10px;
+  animation: spin 1s linear infinite;
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
 
 const PageContainer = styled.div`
   padding: 80px 0;
@@ -82,29 +96,71 @@ const SubmitButton = styled(Button)`
   background: #0a6638;
   border: none;
   padding: 10px 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   
   &:hover {
     background: #084a29;
   }
 `;
 
+const LoaderContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 10px;
+`;
+
 const ContactUs = ({ isDarkMode }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
     subject: '',
-    message: ''
+    message: '',
+    type: 'contact',
+    interest: 'General Inquiry',
+    source: 'Website Contact Form'
   });
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const CONTACT_FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwvBVib3lYPF1vFQWQ1WfwoRkdF-K6fryv-ooIXy2QO5cPhrp0uQEXQaAijH_x8fXHy/exec';
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    toast.success('Message sent successfully! We\'ll get back to you soon.');
-    setFormData({
-      name: '',
-      email: '',
-      subject: '',
-      message: ''
-    });
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch(CONTACT_FORM_ENDPOINT, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          type: 'contact'
+        })
+      });
+  
+      toast.success('Message sent successfully! We\'ll get back to you soon.');
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: '',
+        type: 'contact',
+        interest: 'General Inquiry',
+        source: 'Website Contact Form'
+      });
+    } catch (error) {
+      console.error('Submission error:', error);
+      toast.error('Failed to send message. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -188,6 +244,16 @@ const ContactUs = ({ isDarkMode }) => {
               </Form.Group>
 
               <Form.Group className="mb-3">
+                <Form.Label>Phone Number</Form.Label>
+                <Form.Control
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
                 <Form.Label>Subject</Form.Label>
                 <Form.Control
                   type="text"
@@ -209,10 +275,16 @@ const ContactUs = ({ isDarkMode }) => {
                   required
                 />
               </Form.Group>
-
-              <SubmitButton type="submit">
-                Send Message
-              </SubmitButton>
+              <SubmitButton type="submit" disabled={isLoading}>
+  {isLoading ? (
+    <>
+      Sending
+      <Spinner />
+    </>
+  ) : (
+    'Send Message'
+  )}
+</SubmitButton>
             </ContactForm>
           </Col>
           

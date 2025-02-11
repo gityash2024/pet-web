@@ -379,7 +379,7 @@ const Home = () => {
                     <div className="content">
                       <h3>{pet.name}</h3>
                       <p>{pet.breed}</p>
-                      <p>₹{pet.price}</p>
+                      <p>₹ {pet.price}</p>
                       <Button 
                         variant="outline-success" 
                         onClick={() => handleViewDetails(pet)}
