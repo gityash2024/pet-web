@@ -95,6 +95,7 @@ const Messages = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedMessage, setSelectedMessage] = useState(null);
+  const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef(null);
   const currentUser = JSON.parse(localStorage.getItem('user'));
 
@@ -114,48 +115,32 @@ const Messages = () => {
       return;
     }
     try {
+      setLoading(true);
       const response = await getUserMessages();
-      const groupedConversations = groupMessagesByConversation(response.data.messages);
-      setConversations(Object.values(groupedConversations));
       
-      if (selectedConversation) {
-        const updatedConversation = Object.values(groupedConversations).find(
-          c => c._id === selectedConversation._id
-        );
-        if (updatedConversation) {
-          setMessages(updatedConversation.messages);
-          setSelectedConversation(updatedConversation);
+      // Check the response structure
+      if (response.data && response.data.conversations) {
+        setConversations(response.data.conversations);
+        
+        if (selectedConversation) {
+          const updatedConversation = response.data.conversations.find(
+            c => c._id === selectedConversation._id
+          );
+          if (updatedConversation) {
+            setMessages(updatedConversation.messages);
+            setSelectedConversation(updatedConversation);
+          }
         }
+      } else {
+        console.error('Unexpected response structure:', response);
+        toast.error('Unexpected response from server');
       }
     } catch (error) {
-      toast.error('Failed to fetch messages');
+      console.error('Error fetching messages:', error);
+      toast.error(error.response?.data?.message || 'Failed to fetch messages');
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const groupMessagesByConversation = (messages) => {
-    return messages.reduce((acc, message) => {
-      const otherUser = message.sender._id === currentUser._id ? message.recipient : message.sender;
-      if (otherUser._id === currentUser._id) return acc;
-      
-      const key = `${otherUser._id}-${message.advert._id}`;
-      if (!acc[key]) {
-        acc[key] = {
-          _id: key,
-          otherUser,
-          advert: message.advert,
-          lastMessage: message,
-          unreadCount: message.read || message.sender._id === currentUser._id ? 0 : 1,
-          messages: [message]
-        };
-      } else {
-        acc[key].lastMessage = message;
-        acc[key].messages.push(message);
-        if (!message.read && message.sender._id !== currentUser._id) {
-          acc[key].unreadCount += 1;
-        }
-      }
-      return acc;
-    }, {});
   };
 
   const handleSendMessage = async (e) => {
@@ -165,48 +150,33 @@ const Messages = () => {
     try {
       const response = await sendMessage({
         advertId: selectedConversation.advert._id,
-        recipientId: selectedConversation.otherUser._id,
+        recipientId: selectedConversation.participants.find(p => p._id !== currentUser._id)?._id,
         content: newMessage.trim()
       });
 
-      const sentMessage = {
-        ...response.data.message,
-        sender: { _id: currentUser._id, name: currentUser.name },
-        recipient: selectedConversation.otherUser
-      };
+      const sentMessage = response.data.message;
 
       setMessages(prev => [...prev, sentMessage]);
       setNewMessage('');
-      updateConversationsList(sentMessage);
+      fetchMessages(); // Refresh conversations to update last message
     } catch (error) {
-      toast.error('Failed to send message');
+      console.error('Error sending message:', error);
+      toast.error(error.response?.data?.message || 'Failed to send message');
     }
-  };
-
-  const updateConversationsList = (newMessage) => {
-    setConversations(prev => {
-      const updated = [...prev];
-      const index = updated.findIndex(c => c._id === selectedConversation._id);
-      if (index !== -1) {
-        updated[index] = {
-          ...updated[index],
-          lastMessage: newMessage,
-          messages: [...updated[index].messages, newMessage]
-        };
-      }
-      return updated;
-    });
   };
 
   const handleConversationSelect = async (conversation) => {
     setSelectedConversation(conversation);
     setMessages(conversation.messages);
     
-    conversation.messages.forEach(message => {
-      if (!message.read && message.sender._id !== currentUser._id) {
-        markMessageAsRead(message._id);
-      }
-    });
+    // Mark unread messages as read
+    const unreadMessages = conversation.messages.filter(
+      message => !message.read && message.recipient._id === currentUser._id
+    );
+    
+    await Promise.all(
+      unreadMessages.map(message => markMessageAsRead(message._id))
+    );
   };
 
   const handleMessageOptions = (event, message) => {
@@ -234,6 +204,17 @@ const Messages = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Render loading state
+  // if (loading) {
+  //   return (
+  //     <MainContainer>
+  //       <Typography variant="h6" align="center">
+  //         Loading messages...
+  //       </Typography>
+  //     </MainContainer>
+  //   );
+  // }
+
   return (
     <MainContainer>
       <MessagesContainer elevation={3}>
@@ -250,30 +231,38 @@ const Messages = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </Box>
-          {conversations
-            .filter(conv => 
-              conv.otherUser.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              conv.advert.title.toLowerCase().includes(searchTerm.toLowerCase())
-            )
-            .map(conversation => (
-              <ConversationItem
-                key={conversation._id}
-                selected={selectedConversation?._id === conversation._id}
-                onClick={() => handleConversationSelect(conversation)}
-              >
-                <Badge badgeContent={conversation.unreadCount} color="error">
-                  <Avatar src={`https://i.pravatar.cc/150?u=${conversation.otherUser._id}`} />
-                </Badge>
-                <Box ml={2} flexGrow={1}>
-                  <Typography variant="subtitle1">
-                    {conversation.otherUser.name}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary" noWrap>
-                    {conversation.advert.title}
-                  </Typography>
-                </Box>
-              </ConversationItem>
-            ))}
+          {conversations.length === 0 ? (
+            <Box p={2} textAlign="center">
+              <Typography variant="body2" color="textSecondary">
+                No conversations found
+              </Typography>
+            </Box>
+          ) : (
+            conversations
+              .filter(conv => 
+                conv.participants.some(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                conv.advert.title.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+              .map(conversation => (
+                <ConversationItem
+                  key={conversation._id}
+                  selected={selectedConversation?._id === conversation._id}
+                  onClick={() => handleConversationSelect(conversation)}
+                >
+                  <Badge badgeContent={conversation.unreadCount} color="error">
+                    <Avatar src={`https://i.pravatar.cc/150?u=${conversation.participants[0]._id}`} />
+                  </Badge>
+                  <Box ml={2} flexGrow={1}>
+                    <Typography variant="subtitle1">
+                      {conversation.participants.map(p => p.name).join(', ')}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" noWrap>
+                      {conversation.advert.title}
+                    </Typography>
+                  </Box>
+                </ConversationItem>
+              ))
+          )}
         </ConversationsList>
 
         <ChatArea>
@@ -282,11 +271,11 @@ const Messages = () => {
               <Box p={2} bgcolor="#fffacc">
                 <Grid container alignItems="center" spacing={2}>
                   <Grid item>
-                    <Avatar src={`https://i.pravatar.cc/150?u=${selectedConversation.otherUser._id}`} />
+                    <Avatar src={`https://i.pravatar.cc/150?u=${selectedConversation.participants[0]._id}`} />
                   </Grid>
                   <Grid item xs>
                     <Typography variant="h6">
-                      {selectedConversation.otherUser.name}
+                      {selectedConversation.participants.map(p => p.name).join(', ')}
                     </Typography>
                     <Typography variant="body2">
                       {selectedConversation.advert.title}

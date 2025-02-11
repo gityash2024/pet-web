@@ -23,19 +23,16 @@ export const verifyOTP = (data) => {
 };
 
 
+
+
+
+
 export const addAdvert = (data) => {
   return instance.post(`${baseUrl}users/adverts`, data);
 };
 
 // New functions to add
 
-export const getUserMessages = () => {
-  return instance.get(`${baseUrl}messages`);
-};
-
-export const getAdvertConversation = (advertId) => {
-  return instance.get(`${baseUrl}messages/advert/${advertId}`);
-};
 
 export const getAllAdverts = (page = 1, limit = 9) => {
   return instance.get(`${baseUrl}adverts?page=${page}&limit=${limit}`);
@@ -61,16 +58,7 @@ export const deleteAdvert = (id) => {
   return instance.delete(`${baseUrl}adverts/${id}`);
 };
 
-export const startConversation = (advertId,) => {
-  return instance.post(`${baseUrl}messages/start-conversation`, { advertId });
-};
-export const sendMessage = (data) => {
-  return instance.post(`${baseUrl}messages`, data);
-};
 
-export const markMessageAsRead = (messageId) => {
-  return instance.put(`${baseUrl}messages/${messageId}/read`);
-};
 
 // Additional functions for forgot password and reset password
 export const forgotPassword = (email) => {
@@ -131,4 +119,35 @@ export const getFavorites = () => {
 
 export const getAllCategories=() => {
   return instance.get(`${baseUrl}categories`);
+};
+
+
+export const getAdvertConversation = (advertId) => {
+  return instance.get(`${baseUrl}messages/advert/${advertId}`);
+};
+
+
+
+
+
+export const getUserMessages = () => {
+  return instance.get('/messages');
+};
+
+export const sendMessage = (data) => {
+  return instance.post('/messages', data);
+};
+
+export const markMessageAsRead = (messageId) => {
+  return instance.put(`/messages/${messageId}/read`);
+};
+
+export const startConversation = (advertId) => {
+/*************  ✨ Codeium Command ⭐  *************/
+/**
+ * Retrieves all messages for the current user
+ * 
+ * @returns {Promise<AxiosResponse<any>>} A promise resolving to the API response
+ */
+/******  09131b1d-67a9-4c44-852f-2f10b694e521  *******/  return instance.post('/messages/start-conversation', { advertId });
 };

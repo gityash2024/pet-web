@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Pagination } from 'react-bootstrap';
 import { FaSearch, FaHeart } from 'react-icons/fa';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
@@ -35,6 +35,7 @@ const PetCard = styled(motion.div)`
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   position: relative;
+  margin-bottom: 20px;
 
   img {
     width: 100%;
@@ -74,6 +75,7 @@ const SkeletonCard = styled(motion.div)`
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   height: 100%;
+  margin-bottom: 20px;
   
   .skeleton-img {
     width: 100%;
@@ -83,6 +85,29 @@ const SkeletonCard = styled(motion.div)`
   
   .content {
     padding: 20px;
+  }
+`;
+
+const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+
+  .pagination {
+    .page-item {
+      .page-link {
+        color: #0a6638;
+        &:focus {
+          box-shadow: none;
+        }
+      }
+      &.active .page-link {
+        background-color: #0a6638;
+        border-color: #0a6638;
+        color: #fff;
+      }
+    }
   }
 `;
 
@@ -99,9 +124,11 @@ const Search = () => {
   });
   const [sortBy, setSortBy] = useState('newest');
   const [loading, setLoading] = useState(false);
-    const [categories,setCategories]= useState([]);
-  
- useEffect(() => {
+  const [categories, setCategories] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(6);
+
+  useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await getAllCategories();
@@ -112,7 +139,8 @@ const Search = () => {
       }
     };
     fetchCategories();
-  },[])
+  }, []);
+
   useEffect(() => {
     fetchItems();
   }, [activeTab]);
@@ -137,16 +165,26 @@ const Search = () => {
     );
   });
 
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
+
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters(prevFilters => ({
       ...prevFilters,
       [name]: value
     }));
+    setCurrentPage(1);
   };
 
   const handleViewDetails = (item) => {
     navigate(`/ad/viewDetails/${item._id}`, { state: { advert: item } });
+  };
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   return (
@@ -162,16 +200,21 @@ const Search = () => {
                   id="pets"
                   label="Pets"
                   checked={activeTab === 'pets'}
-                  onChange={() => setActiveTab('pets')}
+                  onChange={() => {
+                    setActiveTab('pets');
+                    setCurrentPage(1);
+                  }}
                 />
                 <Form.Check
                   type="radio"
                   id="accessories"
                   label="Accessories"
                   checked={activeTab === 'accessories'}
-                  onChange={() => setActiveTab('accessories')}
+                  onChange={() => {
+                    setActiveTab('accessories');
+                    setCurrentPage(1);
+                  }}
                 />
-              
               </div>
               {activeTab === 'pets' && (
                 <Form.Group className="mb-3">
@@ -208,7 +251,10 @@ const Search = () => {
                       type="text"
                       placeholder="Search for pets, accessories..."
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setCurrentPage(1);
+                      }}
                     />
                   </Col>
                   <Col sm={3}>
@@ -236,8 +282,8 @@ const Search = () => {
                     </SkeletonCard>
                   </Col>
                 ))
-              ) : (
-                filteredItems.map(item => (
+              ) : currentItems.length > 0 ? (
+                currentItems.map(item => (
                   <Col md={4} key={item._id}>
                     <PetCard
                       whileHover={{ y: -10 }}
@@ -270,8 +316,31 @@ const Search = () => {
                     </PetCard>
                   </Col>
                 ))
+              ) : (
+                <Col>
+                  <p className="text-center">No items found</p>
+                </Col>
               )}
             </Row>
+            {!loading && totalPages > 1 && (
+              <PaginationContainer>
+                <Pagination>
+                  <Pagination.First onClick={() => handlePageChange(1)} disabled={currentPage === 1} />
+                  <Pagination.Prev onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
+                  {[...Array(totalPages)].map((_, index) => (
+                    <Pagination.Item
+                      key={index + 1}
+                      active={currentPage === index + 1}
+                      onClick={() => handlePageChange(index + 1)}
+                    >
+                      {index + 1}
+                    </Pagination.Item>
+                  ))}
+                  <Pagination.Next onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} />
+                  <Pagination.Last onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages} />
+                </Pagination>
+              </PaginationContainer>
+            )}
           </Col>
         </Row>
       </Container>

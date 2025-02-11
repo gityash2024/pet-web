@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Container, Row, Col, Button, Badge, Form } from 'react-bootstrap';
 import { FaPaw, FaMapMarkerAlt, FaPhone, FaEnvelope, FaHeart, FaArrowLeft, FaComments } from 'react-icons/fa';
 import styled from 'styled-components';
@@ -6,7 +6,6 @@ import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { startConversation } from '../contexts/api';
-import { useState } from 'react';
 
 const Spinner = styled.div`
   border: 2px solid #f3f3f3;
@@ -16,13 +15,11 @@ const Spinner = styled.div`
   height: 20px;
   margin-left: 10px;
   animation: spin 1s linear infinite;
-  
   @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
 `;
-
 
 const StyledAdDetails = styled.div`
   background-color: #f8f9fa;
@@ -74,100 +71,47 @@ const AdImage = styled.img`
 const AdDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
   const ad = location.state?.advert;
 
-  if (!ad) {
-    navigate('/search');
-    return null;
-  }
-
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
-    type: 'profile',
-    interest: 'Pet Interest',
-    source: 'Ad Details Page',
-    requirements: ''
-  });
-
-  const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxYwYTOvqp9WBKswFDsHPK6FrL-oDojacB9A3TUjPdepFOoQarTpxhuKSDLQ_XonLk/exec';
-
-  if (!ad) {
-    navigate('/search');
-    return null;
-  }
-
-  const handleFormChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-      requirements: `Interest in: ${ad.name} (${ad.category})`
-    });
-  };
-
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const handleStartConversation = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast.error('Please login to start a conversation');
+      return;
+    }
 
     try {
-      const response = await fetch(FORM_ENDPOINT, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
-
-      toast.success('Your message has been sent successfully!');
-      setFormData({
-        name: '',
-        email: '',
-        message: '',
-        type: 'profile',
-        interest: 'Pet Interest',
-        source: 'Ad Details Page',
-        requirements: ''
-      });
+      setIsLoading(true);
+      const response = await startConversation(ad._id);
+      
+      if (response.data && (response.data.status === 200 || response.data.status === 201)) {
+        navigate('/messages', { 
+          state: { 
+            conversationId: response.data.conversationId
+          } 
+        });
+        toast.success('Conversation started successfully');
+      } else {
+        toast.error('Failed to start conversation');
+      }
     } catch (error) {
-      console.error('Submission error:', error);
-      toast.error('Failed to send message. Please try again.');
+      console.error('Error starting conversation:', error);
+      toast.error('Failed to start conversation. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
+  if (!ad) {
+    navigate('/search');
+    return null;
+  }
 
-
-  const handleStartConversation = async () => {
-    if (!localStorage.getItem('token')) {
-      toast.error('Please login to start a conversation');
-      return;
-    }
-    console.log(ad,'======++++=====+++==++++===+++===+++ad')
-    try {
-      const response = await startConversation(ad._id);
-      if (response.status === 200 || response.status === 201) {
-        navigate('/messages', { state: { conversationId: response.data.conversationId } });
-      } else {
-        toast.error('Failed to start conversation. Please try again.');
-      }
-    } catch (err) {
-      console.error('Error starting conversation:', err);
-      toast.error('Failed to start conversation. Please try again.');
-    }
-  };
   return (
     <StyledAdDetails>
       <Container>
-        <Button 
-          variant="outline-primary" 
-          onClick={() => navigate(-1)}
-          className="mb-3"
-        >
+        <Button variant="outline-primary" onClick={() => navigate(-1)} className="mb-3">
           <FaArrowLeft /> Back
         </Button>
         <Row>
@@ -195,79 +139,89 @@ const AdDetails = () => {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <h3>Contact Information</h3>
-              <ContactInfo>
-                <FaPaw />
-                <span>Age: {ad.age} years</span>
-              </ContactInfo>
-              <ContactInfo>
-                <FaPhone />
-                <span>Breed: {ad.breed}</span>
-              </ContactInfo>
-              <StyledButton className="w-100 mt-3" onClick={handleStartConversation}>
-                <FaComments className="me-2" /> Start Conversation
-              </StyledButton>
-            </GlassmorphicCard>
-        <GlassmorphicCard
-    initial={{ opacity: 0, y: 50 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay: 0.4 }}
-  >
-    <h3>Interested?</h3>
-    <Form onSubmit={handleFormSubmit}>
-      <Form.Group className="mb-3">
-        <Form.Control 
-          type="text" 
-          placeholder="Your Name" 
-          name="name"
-          value={formData.name}
-          onChange={handleFormChange}
-          required
-        />
-      </Form.Group>
-      <Form.Group className="mb-3">
-        <Form.Control 
-          type="email" 
-          placeholder="Your Email" 
-          name="email"
-          value={formData.email}
-          onChange={handleFormChange}
-          required
-        />
-      </Form.Group>
-      <Form.Group className="mb-3">
-        <Form.Control 
-          as="textarea" 
-          rows={3} 
-          placeholder="Your Message" 
-          name="message"
-          value={formData.message}
-          onChange={handleFormChange}
-          required
-        />
-      </Form.Group>
-      <StyledButton 
-        type="submit" 
-        className="w-100 d-flex align-items-center justify-content-center"
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <>
-            Sending
-            <Spinner />
-          </>
-        ) : (
-          'Send Message'
-        )}
-      </StyledButton>
-    </Form>
-  </GlassmorphicCard>
-          </Col>
-        </Row>
-      </Container>
-    </StyledAdDetails>
-  );
-};
-
-export default AdDetails;
+              >
+                <h3>Contact Information</h3>
+                <ContactInfo>
+                  <FaPaw />
+                  <span>Age: {ad.age} years</span>
+                </ContactInfo>
+                <ContactInfo>
+                  <FaPhone />
+                  <span>Breed: {ad.breed}</span>
+                </ContactInfo>
+                <StyledButton 
+                  className="w-100 mt-3" 
+                  onClick={handleStartConversation}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      Starting Conversation
+                      <Spinner />
+                    </>
+                  ) : (
+                    <>
+                      <FaComments className="me-2" /> Start Conversation
+                    </>
+                  )}
+                </StyledButton>
+              </GlassmorphicCard>
+              <GlassmorphicCard
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+              >
+                <h3>Interested?</h3>
+                <Form onSubmit={(e) => {
+                  e.preventDefault();
+                  handleStartConversation();
+                }}>
+                  <Form.Group className="mb-3">
+                    <Form.Control
+                      type="text"
+                      placeholder="Your Name"
+                      name="name"
+                      required
+                    />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Control
+                      type="email"
+                      placeholder="Your Email"
+                      name="email"
+                      required
+                    />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      placeholder="Your Message"
+                      name="message"
+                      required
+                    />
+                  </Form.Group>
+                  <StyledButton
+                    type="submit"
+                    className="w-100 d-flex align-items-center justify-content-center"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        Sending
+                        <Spinner />
+                      </>
+                    ) : (
+                      'Send Message'
+                    )}
+                  </StyledButton>
+                </Form>
+              </GlassmorphicCard>
+            </Col>
+          </Row>
+        </Container>
+      </StyledAdDetails>
+    );
+  };
+  
+  export default AdDetails;

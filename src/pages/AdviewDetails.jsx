@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Container, Row, Col, Button, Badge, Form } from 'react-bootstrap';
 import { FaPaw, FaMapMarkerAlt, FaPhone, FaEnvelope, FaHeart, FaArrowLeft, FaComments } from 'react-icons/fa';
 import styled from 'styled-components';
@@ -6,9 +6,7 @@ import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { startConversation } from '../contexts/api';
-import { useState } from 'react';
 
-// Add this styled component with the others
 const Spinner = styled.div`
   border: 2px solid #f3f3f3;
   border-radius: 50%;
@@ -17,12 +15,12 @@ const Spinner = styled.div`
   height: 20px;
   margin-left: 10px;
   animation: spin 1s linear infinite;
-  
   @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
 `;
+
 const StyledAdDetails = styled.div`
   background-color: #f8f9fa;
   color: #333;
@@ -85,7 +83,7 @@ const AdviewDetails = () => {
     requirements: ''
   });
 
-  const FORM_ENDPOINT = 'YOUR_GOOGLE_SCRIPT_URL';
+  const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxYwYTOvqp9WBKswFDsHPK6FrL-oDojacB9A3TUjPdepFOoQarTpxhuKSDLQ_XonLk/exec';
 
   if (!ad) {
     navigate('/search');
@@ -105,7 +103,7 @@ const AdviewDetails = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(FORM_ENDPOINT, {
+      await fetch(FORM_ENDPOINT, {
         method: 'POST',
         mode: 'no-cors',
         headers: {
@@ -124,6 +122,7 @@ const AdviewDetails = () => {
         source: 'Ad Details Page',
         requirements: ''
       });
+      handleStartConversation();
     } catch (error) {
       console.error('Submission error:', error);
       toast.error('Failed to send message. Please try again.');
@@ -131,33 +130,40 @@ const AdviewDetails = () => {
       setIsLoading(false);
     }
   };
- 
 
   const handleStartConversation = async () => {
-    if (!localStorage.getItem('token')) {
+    const token = localStorage.getItem('token');
+    if (!token) {
       toast.error('Please login to start a conversation');
       return;
     }
+
     try {
+      setIsLoading(true);
       const response = await startConversation(ad._id);
-      if (response.status === 200 || response.status === 201) {
-        navigate('/messages', { state: { conversationId: response.data.conversationId } });
+      
+      if (response.data && (response.data.status === 200 || response.data.status === 201)) {
+        navigate('/messages', { 
+          state: { 
+            conversationId: response.data.conversationId
+          } 
+        });
+        toast.success('Conversation started successfully');
       } else {
-        toast.error('Failed to start conversation. Please try again.');
+        toast.error('Failed to start conversation');
       }
-    } catch (err) {
-      console.error('Error starting conversation:', err);
+    } catch (error) {
+      console.error('Error starting conversation:', error);
       toast.error('Failed to start conversation. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
+
   return (
     <StyledAdDetails>
       <Container>
-        <Button 
-          variant="outline-primary" 
-          onClick={() => navigate(-1)}
-          className="mb-3"
-        >
+        <Button variant="outline-primary" onClick={() => navigate(-1)} className="mb-3">
           <FaArrowLeft /> Back
         </Button>
         <Row>
@@ -195,64 +201,61 @@ const AdviewDetails = () => {
                 <FaPhone />
                 <span>Breed: {ad.breed}</span>
               </ContactInfo>
-              {/* <StyledButton className="w-100 mt-3" onClick={handleStartConversation}>
-                <FaComments className="me-2" /> Start Conversation
-              </StyledButton> */}
             </GlassmorphicCard>
             <GlassmorphicCard
-    initial={{ opacity: 0, y: 50 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay: 0.4 }}
-  >
-    <h3>Interested?</h3>
-    <Form onSubmit={handleFormSubmit}>
-      <Form.Group className="mb-3">
-        <Form.Control 
-          type="text" 
-          placeholder="Your Name" 
-          name="name"
-          value={formData.name}
-          onChange={handleFormChange}
-          required
-        />
-      </Form.Group>
-      <Form.Group className="mb-3">
-        <Form.Control 
-          type="email" 
-          placeholder="Your Email" 
-          name="email"
-          value={formData.email}
-          onChange={handleFormChange}
-          required
-        />
-      </Form.Group>
-      <Form.Group className="mb-3">
-        <Form.Control 
-          as="textarea" 
-          rows={3} 
-          placeholder="Your Message" 
-          name="message"
-          value={formData.message}
-          onChange={handleFormChange}
-          required
-        />
-      </Form.Group>
-      <StyledButton 
-        type="submit" 
-        className="w-100 d-flex align-items-center justify-content-center"
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <>
-            Sending
-            <Spinner />
-          </>
-        ) : (
-          'Send Message'
-        )}
-      </StyledButton>
-    </Form>
-  </GlassmorphicCard>
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <h3>Interested?</h3>
+              <Form onSubmit={handleFormSubmit}>
+                <Form.Group className="mb-3">
+                  <Form.Control 
+                    type="text" 
+                    placeholder="Your Name" 
+                    name="name"
+                    value={formData.name}
+                    onChange={handleFormChange}
+                    required
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Control 
+                    type="email" 
+                    placeholder="Your Email" 
+                    name="email"
+                    value={formData.email}
+                    onChange={handleFormChange}
+                    required
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Control 
+                    as="textarea" 
+                    rows={3} 
+                    placeholder="Your Message" 
+                    name="message"
+                    value={formData.message}
+                    onChange={handleFormChange}
+                    required
+                  />
+                </Form.Group>
+                <StyledButton 
+                  type="submit" 
+                  className="w-100 d-flex align-items-center justify-content-center"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      Sending
+                      <Spinner />
+                    </>
+                  ) : (
+                    'Send Message'
+                  )}
+                </StyledButton>
+              </Form>
+            </GlassmorphicCard>
           </Col>
         </Row>
       </Container>
