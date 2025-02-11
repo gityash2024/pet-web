@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
-import { getAllAdverts, getUserAdverts, createAdvert, updateAdvert, deleteAdvert } from '../contexts/api';
+import { getAllAdverts, getUserAdverts,getAllCategories, createAdvert, updateAdvert, deleteAdvert } from '../contexts/api';
 import Loader from '../components/Loader/Loader';
 import { toast } from 'react-toastify';
 import profileImage from '../assets/profile.png';
@@ -369,6 +369,8 @@ const AddAdvert = ({ isDarkMode }) => {
   const [adverts, setAdverts] = useState([]);
   const [userAdverts, setUserAdverts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [categories,setCategories]= useState([]);
   const [loading, setLoading] = useState(true);
   const [editingAdvert, setEditingAdvert] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
@@ -388,6 +390,19 @@ const AddAdvert = ({ isDarkMode }) => {
     fetchAdverts();
     fetchUserAdverts();
   }, []);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getAllCategories();
+        setCategories(response.data.categories || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        toast.error('Failed to load categories');
+      }
+    };
+    fetchCategories();
+  },[])
 
   const fetchAdverts = async () => {
     setLoading(true);
@@ -591,9 +606,11 @@ const AddAdvert = ({ isDarkMode }) => {
                 onChange={handleFilterChange}
               >
                 <option value="all">All Categories</option>
-                <option value="pet">Pets</option>
-                <option value="accessory">Accessories</option>
-                <option value="service">Services</option>
+                {categories.map(category => (
+                  <option key={category._id} value={category.name}>
+                    {category.name}
+                  </option>
+                ))}
               </Form.Select>
             </Col>
             <Col md={4}>

@@ -128,3 +128,7 @@ export const toggleFavorite = (itemType, itemId) => {
 export const getFavorites = () => {
   return instance.get(`${baseUrl}favorites`);
 };
+
+export const getAllCategories=() => {
+  return instance.get(`${baseUrl}categories`);
+};

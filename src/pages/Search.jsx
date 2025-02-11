@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, Button, Pagination } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import { FaSearch, FaHeart } from 'react-icons/fa';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { getAllPets, getAllAccessories, getAllAdverts } from '../contexts/api';
+import { getAllPets, getAllAccessories } from '../contexts/api';
 import profileImage from '../assets/profile.png';
 
 const StyledSearch = styled.div`
@@ -45,6 +45,17 @@ const PetCard = styled(motion.div)`
   .content {
     padding: 20px;
   }
+`;
+
+const DiscountBadge = styled.div`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #fffacc;
+  color: #0a6638;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 5px;
 `;
 
 const VerifiedBadge = styled.div`
@@ -88,8 +99,6 @@ const Search = () => {
   });
   const [sortBy, setSortBy] = useState('newest');
   const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
 
   useEffect(() => {
     fetchItems();
@@ -98,23 +107,8 @@ const Search = () => {
   const fetchItems = async () => {
     setLoading(true);
     try {
-      let response;
-      switch(activeTab) {
-        case 'pets':
-          response = await getAllPets();
-          setItems(response?.data?.pets || []);
-          break;
-        case 'accessories':
-          response = await getAllAccessories();
-          setItems(response?.data?.accessories || []);
-          break;
-        case 'advert':
-          response = await getAllAdverts();
-          setItems(response?.data?.adverts || []);
-          break;
-        default:
-          setItems([]);
-      }
+      const response = await (activeTab === 'pets' ? getAllPets() : getAllAccessories());
+      setItems(response?.data?.[activeTab] || []);
     } catch (error) {
       toast.error('Error fetching items');
     }
@@ -122,26 +116,13 @@ const Search = () => {
   };
 
   const filteredItems = items.filter(item => {
-    const nameToSearch = item.name || item.title;
     return (
-      nameToSearch?.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (filters.category === '' || item.category === filters.category) &&
       (filters.minPrice === '' || item.price >= Number(filters.minPrice)) &&
       (filters.maxPrice === '' || item.price <= Number(filters.maxPrice))
     );
   });
-
-  const sortedItems = filteredItems.sort((a, b) => {
-    if (sortBy === 'priceAsc') return a.price - b.price;
-    if (sortBy === 'priceDesc') return b.price - a.price;
-    return new Date(b.createdAt) - new Date(a.createdAt);
-  });
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = sortedItems.slice(indexOfFirstItem, indexOfLastItem);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -149,17 +130,10 @@ const Search = () => {
       ...prevFilters,
       [name]: value
     }));
-    setCurrentPage(1);
   };
 
   const handleViewDetails = (item) => {
-    if (activeTab === 'pets') {
-      navigate(`/ad/viewDetails/${item._id}`, { state: { advert: item } });
-    } else if (activeTab === 'accessories') {
-      navigate(`/ad/viewDetails/${item._id}`, { state: { advert: item } });
-    } else if (activeTab === 'advert') {
-      navigate(`/ad/${item._id}`, { state: { advert: item } });
-    }
+    navigate(`/ad/viewDetails/${item._id}`, { state: { advert: item } });
   };
 
   return (
@@ -175,51 +149,25 @@ const Search = () => {
                   id="pets"
                   label="Pets"
                   checked={activeTab === 'pets'}
-                  onChange={() => {
-                    setActiveTab('pets');
-                    setCurrentPage(1);
-                  }}
+                  onChange={() => setActiveTab('pets')}
                 />
                 <Form.Check
                   type="radio"
                   id="accessories"
                   label="Accessories"
                   checked={activeTab === 'accessories'}
-                  onChange={() => {
-                    setActiveTab('accessories');
-                    setCurrentPage(1);
-                  }}
+                  onChange={() => setActiveTab('accessories')}
                 />
-                <Form.Check
-                  type="radio"
-                  id="advert"
-                  label="Advert"
-                  checked={activeTab === 'advert'}
-                  onChange={() => {
-                    setActiveTab('advert');
-                    setCurrentPage(1);
-                  }}
-                />
+              
               </div>
-              {(activeTab === 'pets' || activeTab === 'advert') && (
+              {activeTab === 'pets' && (
                 <Form.Group className="mb-3">
                   <Form.Label>Category</Form.Label>
                   <Form.Select name="category" value={filters.category} onChange={handleFilterChange}>
                     <option value="">All Categories</option>
-                    {activeTab === 'pets' && (
-                      <>
-                        <option value="Dog">Dog</option>
-                        <option value="Cat">Cat</option>
-                        <option value="Fish">Fish</option>
-                      </>
-                    )}
-                    {activeTab === 'advert' && (
-                      <>
-                        <option value="pet">Pet</option>
-                        <option value="accessory">Accessory</option>
-                        <option value="service">Service</option>
-                      </>
-                    )}
+                    <option value="Dog">Dog</option>
+                    <option value="Cat">Cat</option>
+                    <option value="Fish">Fish</option>
                   </Form.Select>
                 </Form.Group>
               )}
@@ -234,14 +182,6 @@ const Search = () => {
                   </Col>
                 </Row>
               </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Sort By</Form.Label>
-                <Form.Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                  <option value="newest">Newest</option>
-                  <option value="priceAsc">Price: Low to High</option>
-                  <option value="priceDesc">Price: High to Low</option>
-                </Form.Select>
-              </Form.Group>
             </FilterSection>
           </Col>
           <Col lg={9}>
@@ -253,10 +193,7 @@ const Search = () => {
                       type="text"
                       placeholder="Search for pets, accessories..."
                       value={searchTerm}
-                      onChange={(e) => {
-                        setSearchTerm(e.target.value);
-                        setCurrentPage(1);
-                      }}
+                      onChange={(e) => setSearchTerm(e.target.value)}
                     />
                   </Col>
                   <Col sm={3}>
@@ -270,7 +207,7 @@ const Search = () => {
             </SearchSection>
             
             <h2 className="my-4">
-              {activeTab === 'pets' ? 'Pet Breeds' : activeTab === 'accessories' ? 'Pet Accessories' : 'Adverts'}
+              {activeTab === 'pets' ? 'Pet Breeds' : 'Pet Accessories'}
             </h2>
             <Row>
               {loading ? (
@@ -284,23 +221,17 @@ const Search = () => {
                     </SkeletonCard>
                   </Col>
                 ))
-              ) : currentItems.length === 0 ? (
-                <Col>
-                  <div className="text-center py-5">
-                    <h4>No items found</h4>
-                  </div>
-                </Col>
               ) : (
-                currentItems.map(item => (
+                filteredItems.map(item => (
                   <Col md={4} key={item._id}>
                     <PetCard
                       whileHover={{ y: -10 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <img src={item.image || item.images?.[0] || profileImage} alt={item.name || item.title} />
+                      <img src={item.images?.[0] || profileImage} alt={item.name} />
                       <div className="content">
                         <div className="d-flex align-items-center mb-2">
-                          <h4>{item.name || item.title}</h4>
+                          <h4>{item.name}</h4>
                           {activeTab === 'pets' && (
                             <VerifiedBadge>VERIFIED</VerifiedBadge>
                           )}
@@ -309,8 +240,7 @@ const Search = () => {
                           <strong>₹{item.price}</strong>
                         </div>
                         <div>{item.category}</div>
-                        {activeTab === 'pets' && <div>{item.breed}</div>}
-                        {activeTab === 'advert' && <div>{item.description?.substring(0, 50)}...</div>}
+                        <div>{item.breed}</div>
                         <div className="mt-3">
                           <Button 
                             variant="outline-success"
@@ -327,21 +257,6 @@ const Search = () => {
                 ))
               )}
             </Row>
-            {sortedItems.length > itemsPerPage && (
-              <div className="d-flex justify-content-center mt-4">
-                <Pagination>
-                  {[...Array(Math.ceil(sortedItems.length / itemsPerPage)).keys()].map(number => (
-                    <Pagination.Item 
-                      key={number + 1} 
-                      active={number + 1 === currentPage}
-                      onClick={() => paginate(number + 1)}
-                    >
-                      {number + 1}
-                    </Pagination.Item>
-                  ))}
-                </Pagination>
-              </div>
-            )}
           </Col>
         </Row>
       </Container>
