@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaSearch, FaShieldAlt, FaCreditCard, FaUserShield } from 'react-icons/fa';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getAllPets, getAllArticles, getAllAdverts } from '../contexts/api';
+import { getAllPets, getAllAccessories, getAllCategories } from '../contexts/api';
 import { toast } from 'react-toastify';
 import cardImage from '../assets/profile.png'
 import { Placeholder } from 'react-bootstrap';
@@ -61,6 +61,7 @@ const SearchSection = styled.div`
   padding: 30px;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  position: relative;
 `;
 
 const SearchInput = styled.input`
@@ -78,6 +79,31 @@ const SearchButton = styled(Button)`
   padding: 15px;
   &:hover {
     background-color: #085530;
+  }
+`;
+
+const SuggestionDropdown = styled.div`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+`;
+
+const SuggestionItem = styled.div`
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  &:hover {
+    background-color: #f8f9fa;
   }
 `;
 
@@ -122,8 +148,102 @@ const FeatureBox = styled(motion.div)`
 const Home = () => {
   const [featuredPets, setFeaturedPets] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+
+  const indianStates = [
+    "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", 
+    "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", 
+    "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", 
+    "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", 
+    "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", 
+    "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli", 
+    "Daman and Diu", "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
+  ];
+
+  const [selectedLocation, setSelectedLocation] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getAllCategories();
+        setCategories(response.data.categories || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        toast.error('Failed to load categories');
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    fetchFeaturedPets();
+  }, []);
+
+  useEffect(() => {
+    if (searchTerm.length > 1) {
+      fetchSuggestions();
+    } else {
+      setSearchSuggestions([]);
+    }
+  }, [searchTerm]);
+
+  const fetchFeaturedPets = async () => {
+    try {
+      const response = await getAllPets();
+      setFeaturedPets(response.data.pets.slice(0, 4));
+    } catch (error) {
+      toast.error('Failed to fetch featured pets');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchSuggestions = async () => {
+    try {
+      const [petsResponse, accessoriesResponse] = await Promise.all([
+        getAllPets(),
+        getAllAccessories()
+      ]);
+
+      const petSuggestions = petsResponse.data.pets
+        .filter(pet => pet.name.toLowerCase().includes(searchTerm.toLowerCase()))
+        .map(pet => ({ ...pet, type: 'pet' }));
+
+      const accessorySuggestions = accessoriesResponse.data.accessories
+        .filter(accessory => accessory.name.toLowerCase().includes(searchTerm.toLowerCase()))
+        .map(accessory => ({ ...accessory, type: 'accessory' }));
+
+      setSearchSuggestions([...petSuggestions, ...accessorySuggestions]);
+    } catch (error) {
+      toast.error('Failed to fetch suggestions');
+      setSearchSuggestions([]);
+    }
+  };
+
+  const handleSearch = () => {
+    navigate(`/search?q=${searchTerm}&location=${selectedLocation}&category=${selectedCategory}`);
+  };
+
+  const handleSuggestionSelect = (item) => {
+    navigate(`/ad/viewDetails/${item._id}`, { 
+      state: { 
+        advert: {
+          _id: item._id,
+          title: item.name,
+          category: item.category,
+          type: item.type,
+          price: item.price,
+          description: item.description,
+          images: [item.images?.[0] || cardImage]
+        } 
+      } 
+    });
+    setSearchSuggestions([]);
+  };
 
   const handleViewDetails = (pet) => {
     navigate(`/ad/viewDetails/${pet._id}`, { 
@@ -142,25 +262,6 @@ const Home = () => {
         } 
       } 
     });
-   };
-
-  useEffect(() => {
-    fetchFeaturedPets();
-  }, []);
-
-  const fetchFeaturedPets = async () => {
-    try {
-      const response = await getAllPets();
-      setFeaturedPets(response.data.pets.slice(0, 4));
-    } catch (error) {
-      toast.error('Failed to fetch featured pets');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSearch = () => {
-    navigate(`/search?q=${searchTerm}`);
   };
 
   const features = [
@@ -255,30 +356,37 @@ const Home = () => {
                 >
                   <SearchSection>
                     <h2>Find your perfect pet</h2>
-                    <SearchInput
-                      type="text"
-                      placeholder="Search for pets..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    <Row>
-                      <Col sm={6}>
-                        <select className="form-select mb-3">
-                          <option>Select Pet Type</option>
-                          <option>Dogs</option>
-                          <option>Cats</option>
-                          <option>Other Pets</option>
-                        </select>
-                      </Col>
-                      <Col sm={6}>
-                        <select className="form-select mb-3">
-                          <option>Select Location</option>
-                          <option>London</option>
-                          <option>Manchester</option>
-                          <option>Birmingham</option>
-                        </select>
-                      </Col>
-                    </Row>
+                    <div style={{ position: 'relative' }}>
+                      <SearchInput
+                        type="text"
+                        placeholder="Search for pets & accessories"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                      {searchSuggestions.length > 0 && (
+                        <SuggestionDropdown>
+                          {searchSuggestions.map((item, index) => (
+                            <SuggestionItem 
+                              key={index} 
+                              onClick={() => handleSuggestionSelect(item)}
+                            >
+                              <img 
+                                src={item.images?.[0] || cardImage} 
+                                alt={item.name} 
+                                style={{ width: 50, height: 50, marginRight: 10, objectFit: 'cover' }}
+                              />
+                              <div>
+                                <strong style={{color: '#0a6638'}}>{item.name}</strong>
+                                <div style={{ fontSize: '0.8em', color: '#666' }}>
+                                  {item.type === 'pet' ? 'Pet' : 'Accessory'} | ₹{item.price}
+                                </div>
+                              </div>
+                            </SuggestionItem>
+                          ))}
+                        </SuggestionDropdown>
+                      )}
+                    </div>
+                  
                     <SearchButton onClick={handleSearch}>
                       <FaSearch className="me-2" /> Search
                     </SearchButton>
@@ -303,8 +411,7 @@ const Home = () => {
                   variants={itemVariants}
                   initial="hidden"
                   animate="visible"
-                  whileHover={{ 
-                    scale: 1.05,
+                  whileHover={{scale: 1.05,
                     transition: { duration: 0.3 }
                   }}
                 >
