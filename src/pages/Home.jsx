@@ -126,7 +126,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
 
   const handleViewDetails = (pet) => {
-    navigate(`/ad/${pet._id}`, { 
+    navigate(`/ad/viewDetails/${pet._id}`, { 
       state: { 
         advert: {
           _id: pet._id,
