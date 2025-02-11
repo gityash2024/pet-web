@@ -3,12 +3,12 @@ import { Container, Row, Col, Button, Card } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaSearch, FaShieldAlt, FaCreditCard, FaUserShield } from 'react-icons/fa';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getAllPets, getAllArticles, getAllAdverts } from '../contexts/api';
 import { toast } from 'react-toastify';
 import cardImage from '../assets/profile.png'
 import { Placeholder } from 'react-bootstrap';
-// Add this styled component with your other styled components
+
 const SkeletonCard = styled(motion.div)`
   background: #fff;
   border-radius: 10px;
@@ -26,6 +26,7 @@ const SkeletonCard = styled(motion.div)`
     padding: 20px;
   }
 `;
+
 const SafetyIllustration = () => (
     <svg width="200" height="200" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path 
@@ -103,7 +104,7 @@ const PetCard = styled(motion.div)`
   }
 `;
 
-const FeatureBox = styled.div`
+const FeatureBox = styled(motion.div)`
   text-align: center;
   padding: 20px;
   background: #fff;
@@ -142,6 +143,7 @@ const Home = () => {
       } 
     });
    };
+
   useEffect(() => {
     fetchFeaturedPets();
   }, []);
@@ -179,129 +181,219 @@ const Home = () => {
     }
   ];
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        delayChildren: 0.3,
+        staggerChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.5
+      }
+    }
+  };
+
+  const heroVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const searchVariants = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.5,
+        ease: "easeInOut"
+      }
+    }
+  };
+
   return (
     <>
       <HeroSection>
         <Container>
-          <Row className="align-items-center">
-            <Col md={6}>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <h1>A safe start to a lifelong friendship</h1>
-                <p className="lead mb-4">Connect with trusted breeders and rescues</p>
-              </motion.div>
-            </Col>
-            <Col md={6}>
-              <SearchSection>
-                <h2>Find your perfect pet</h2>
-                <SearchInput
-                  type="text"
-                  placeholder="Search for pets..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <Row>
-                  <Col sm={6}>
-                    <select className="form-select mb-3">
-                      <option>Select Pet Type</option>
-                      <option>Dogs</option>
-                      <option>Cats</option>
-                      <option>Other Pets</option>
-                    </select>
-                  </Col>
-                  <Col sm={6}>
-                    <select className="form-select mb-3">
-                      <option>Select Location</option>
-                      <option>London</option>
-                      <option>Manchester</option>
-                      <option>Birmingham</option>
-                    </select>
-                  </Col>
-                </Row>
-                <SearchButton onClick={handleSearch}>
-                  <FaSearch className="me-2" /> Search
-                </SearchButton>
-              </SearchSection>
-            </Col>
-          </Row>
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={heroVariants}
+          >
+            <Row className="align-items-center">
+              <Col md={6}>
+                <motion.div
+                  initial="hidden"
+                  animate="visible"
+                  variants={heroVariants}
+                >
+                  <h1>A safe start to a lifelong friendship</h1>
+                  <p className="lead mb-4">Connect with trusted breeders and rescues</p>
+                </motion.div>
+              </Col>
+              <Col md={6}>
+                <motion.div
+                  initial="hidden"
+                  animate="visible"
+                  variants={searchVariants}
+                >
+                  <SearchSection>
+                    <h2>Find your perfect pet</h2>
+                    <SearchInput
+                      type="text"
+                      placeholder="Search for pets..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <Row>
+                      <Col sm={6}>
+                        <select className="form-select mb-3">
+                          <option>Select Pet Type</option>
+                          <option>Dogs</option>
+                          <option>Cats</option>
+                          <option>Other Pets</option>
+                        </select>
+                      </Col>
+                      <Col sm={6}>
+                        <select className="form-select mb-3">
+                          <option>Select Location</option>
+                          <option>London</option>
+                          <option>Manchester</option>
+                          <option>Birmingham</option>
+                        </select>
+                      </Col>
+                    </Row>
+                    <SearchButton onClick={handleSearch}>
+                      <FaSearch className="me-2" /> Search
+                    </SearchButton>
+                  </SearchSection>
+                </motion.div>
+              </Col>
+            </Row>
+          </motion.div>
         </Container>
       </HeroSection>
 
       <Container className="my-5">
-        <Row>
-          {features.map((feature, index) => (
-            <Col md={4} key={index}>
-              <FeatureBox>
-                {feature.icon}
-                <h3>{feature.title}</h3>
-                <p>{feature.description}</p>
-              </FeatureBox>
-            </Col>
-          ))}
-        </Row>
-
-        <SafetyCard>
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
           <Row>
-            <Col md={8}>
-              <h2>Need help? We're here to provide a safe start to your lifelong friendship</h2>
-              <p>We have a bunch of handy articles to answer common questions. Can't find what you're looking for? Contact our dedicated trust and safety team.</p>
-              <Button variant="success" as={Link} to="/knowledge-hub">Learn more about pet safety</Button>
-              <Button variant="warning" className="ms-3">I need help</Button>
-            </Col>
-            <Col md={4}>
-           <SafetyIllustration/>
-            </Col>
+            {features.map((feature, index) => (
+              <Col md={4} key={index}>
+                <FeatureBox
+                  variants={itemVariants}
+                  initial="hidden"
+                  animate="visible"
+                  whileHover={{ 
+                    scale: 1.05,
+                    transition: { duration: 0.3 }
+                  }}
+                >
+                  {feature.icon}
+                  <h3>{feature.title}</h3>
+                  <p>{feature.description}</p>
+                </FeatureBox>
+              </Col>
+            ))}
           </Row>
-        </SafetyCard>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <SafetyCard>
+            <Row>
+              <Col md={8}>
+                <h2>Need help? We're here to provide a safe start to your lifelong friendship</h2>
+                <p>We have a bunch of handy articles to answer common questions. Can't find what you're looking for? Contact our dedicated trust and safety team.</p>
+                <Button variant="success" as={Link} to="/knowledge-hub">Learn more about pet safety</Button>
+                <Button variant="warning" className="ms-3">I need help</Button>
+              </Col>
+              <Col md={4}>
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <SafetyIllustration/>
+                </motion.div>
+              </Col>
+            </Row>
+          </SafetyCard>
+        </motion.div>
 
         <h2 className="mb-4">Featured Pets</h2>
         <Row>
-  {loading ? (
-    // Skeleton loading cards
-    [...Array(4)].map((_, index) => (
-      <Col md={3} key={`skeleton-${index}`}>
-        <SkeletonCard>
-          <div className="skeleton-img" />
-          <div className="content">
-            <Placeholder as="div" animation="glow">
-              <Placeholder xs={8} className="mb-2" />
-              <Placeholder xs={6} className="mb-2" />
-              <Placeholder xs={4} className="mb-3" />
-              <Placeholder.Button variant="success" xs={12} />
-            </Placeholder>
-          </div>
-        </SkeletonCard>
-      </Col>
-    ))
-  ) : (
-    // Actual pet cards
-    featuredPets.map((pet) => (
-      <Col md={3} key={pet._id}>
-        <PetCard
-          whileHover={{ y: -10 }}
-          transition={{ duration: 0.3 }}
-        >
-          <img src={pet.images[0]||cardImage} alt={pet.name} />
-          <div className="content">
-            <h3>{pet.name}</h3>
-            <p>{pet.breed}</p>
-            <p>₹{pet.price}</p>
-            <Button 
- variant="outline-success" 
- onClick={() => handleViewDetails(pet)}
- className="w-100"
->
- View Details
-</Button>
-          </div>
-        </PetCard>
-      </Col>
-    ))
-  )}
-</Row>
+          {loading ? (
+            [...Array(4)].map((_, index) => (
+              <Col md={3} key={`skeleton-${index}`}>
+                <SkeletonCard>
+                  <div className="skeleton-img" />
+                  <div className="content">
+                    <Placeholder as="div" animation="glow">
+                      <Placeholder xs={8} className="mb-2" />
+                      <Placeholder xs={6} className="mb-2" />
+                      <Placeholder xs={4} className="mb-3" />
+                      <Placeholder.Button variant="success" xs={12} />
+                    </Placeholder>
+                  </div>
+                </SkeletonCard>
+              </Col>
+            ))
+          ) : (
+            <AnimatePresence>
+              {featuredPets.map((pet) => (
+                <Col md={3} key={pet._id}>
+                  <PetCard
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    whileHover={{ 
+                      y: -10,
+                      transition: { duration: 0.3 }
+                    }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <img src={pet.images[0]||cardImage} alt={pet.name} />
+                    <div className="content">
+                      <h3>{pet.name}</h3>
+                      <p>{pet.breed}</p>
+                      <p>₹{pet.price}</p>
+                      <Button 
+                        variant="outline-success" 
+                        onClick={() => handleViewDetails(pet)}
+                        className="w-100"
+                      >
+                        View Details
+                      </Button>
+                    </div>
+                  </PetCard>
+                </Col>
+              ))}
+            </AnimatePresence>
+          )}
+        </Row>
       </Container>
     </>
   );

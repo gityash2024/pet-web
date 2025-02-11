@@ -69,6 +69,7 @@ const AdDetails = () => {
       toast.error('Please login to start a conversation');
       return;
     }
+    console.log(ad,'======++++=====+++==++++===+++===+++ad')
     try {
       const response = await startConversation(ad._id);
       if (response.status === 200 || response.status === 201) {

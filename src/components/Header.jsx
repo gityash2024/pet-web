@@ -129,6 +129,16 @@ const Header = ({ handleLoginModal, isLoggedIn, userProfilePic }) => {
     }
   };
 
+  const handleNewAdvert = () => {
+    if (isLoggedIn) {
+      navigate('/add-advert');
+      setExpanded(false);
+    } else {
+      handleLoginModal(true);
+      setExpanded(false);
+    }
+  };
+
   const handleNavClick = () => {
     setExpanded(false);
   };
@@ -163,10 +173,8 @@ const Header = ({ handleLoginModal, isLoggedIn, userProfilePic }) => {
             </Nav>
             <div className="profile-section">
               <Button 
-                as={Link} 
-                to="/add-advert" 
                 className="btn-new-advert"
-                onClick={handleNavClick}
+                onClick={handleNewAdvert}
               >
                 + New Advert
               </Button>
