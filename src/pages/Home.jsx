@@ -144,7 +144,14 @@ const FeatureBox = styled(motion.div)`
     margin-bottom: 15px;
   }
 `;
-
+const NoDataSVG = () => (
+  <svg width="120" height="120" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="120" cy="120" r="80" fill="#f5f5f5"/>
+    <path d="M160 100c0 22.1-17.9 40-40 40s-40-17.9-40-40 17.9-40 40-40 40 17.9 40 40z" stroke="#0a6638" strokeWidth="8"/>
+    <path d="M170 170l-25-25" stroke="#0a6638" strokeWidth="8" strokeLinecap="round"/>
+    <path d="M120 80v40M100 100h40" stroke="#0a6638" strokeWidth="8" strokeLinecap="round"/>
+  </svg>
+);
 const Home = () => {
   const [featuredPets, setFeaturedPets] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -363,32 +370,39 @@ const Home = () => {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                       />
-                      {searchSuggestions.length > 0 && (
-                        <SuggestionDropdown>
-                          {searchSuggestions.map((item, index) => (
-                            <SuggestionItem 
-                              key={index} 
-                              onClick={() => handleSuggestionSelect(item)}
-                            >
-                              <img 
-                                src={item.images?.[0] || cardImage} 
-                                alt={item.name} 
-                                style={{ width: 50, height: 50, marginRight: 10, objectFit: 'cover' }}
-                              />
-                              <div>
-                                <strong style={{color: '#0a6638'}}>{item.name}</strong>
-                                <div style={{ fontSize: '0.8em', color: '#666' }}>
-                                  {item.type === 'pet' ? 'Pet' : 'Accessory'} | ₹{item.price}
-                                </div>
-                              </div>
-                            </SuggestionItem>
-                          ))}
-                        </SuggestionDropdown>
-                      )}
+                    {searchTerm.length > 1 && (
+  <SuggestionDropdown>
+    {searchSuggestions.length > 0 ? (
+      searchSuggestions.map((item, index) => (
+        <SuggestionItem 
+          key={index} 
+          onClick={() => handleSuggestionSelect(item)}
+        >
+          <img 
+            src={item.images?.[0] || cardImage} 
+            alt={item.name} 
+            style={{ width: 50, height: 50, marginRight: 10, objectFit: 'cover' }}
+          />
+          <div>
+            <strong style={{color: '#0a6638'}}>{item.name}</strong>
+            <div style={{ fontSize: '0.8em', color: '#666' }}>
+              {item.type === 'pet' ? 'Pet' : 'Accessory'} | ₹{item.price}
+            </div>
+          </div>
+        </SuggestionItem>
+      ))
+    ) : (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <NoDataSVG />
+        <p style={{ marginTop: '10px', color: '#666' }}>No results found</p>
+      </div>
+    )}
+  </SuggestionDropdown>
+)}
                     </div>
                   
                     <SearchButton onClick={handleSearch}>
-                      <FaSearch className="me-2" /> Search
+                      <FaSearch className="me-2" /> Search All Categories
                     </SearchButton>
                   </SearchSection>
                 </motion.div>
