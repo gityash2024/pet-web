@@ -36,6 +36,9 @@ const PetCard = styled(motion.div)`
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   position: relative;
   margin-bottom: 20px;
+  height: 450px;
+  display: flex;
+  flex-direction: column;
 
   img {
     width: 100%;
@@ -45,28 +48,32 @@ const PetCard = styled(motion.div)`
 
   .content {
     padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .button-container {
+    margin-top: auto;
+    padding: 0 20px 20px 20px;
   }
 `;
 
-const DiscountBadge = styled.div`
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: #fffacc;
-  color: #0a6638;
-  font-weight: bold;
-  padding: 5px 10px;
+const Badge = styled.span`
+  display: inline-block;
+  background-color: ${props => props.type === 'verified' ? '#0a6638' : '#fffacc'};
+  color: ${props => props.type === 'verified' ? '#fff' : '#0a6638'};
+  font-size: 12px;
+  padding: 3px 8px;
   border-radius: 5px;
+  margin-right: 8px;
+  margin-bottom: 8px;
 `;
 
-const VerifiedBadge = styled.div`
-  display: inline-block;
-  background-color: #0a6638;
-  color: #fff;
-  font-size: 12px;
-  padding: 3px 6px;
-  border-radius: 5px;
-  margin-left: 10px;
+const BadgeContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
 `;
 
 const SkeletonCard = styled(motion.div)`
@@ -74,7 +81,7 @@ const SkeletonCard = styled(motion.div)`
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  height: 100%;
+  height: 450px;
   margin-bottom: 20px;
   
   .skeleton-img {
@@ -93,7 +100,7 @@ const PaginationContainer = styled.div`
   justify-content: center;
   margin-top: 20px;
   margin-bottom: 20px;
-
+  
   .pagination {
     .page-item {
       .page-link {
@@ -113,7 +120,7 @@ const PaginationContainer = styled.div`
 
 const Search = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('pets');
+  const [activeTab, setActiveTab] = useState('all');
   const [items, setItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
@@ -122,34 +129,48 @@ const Search = () => {
     maxPrice: '',
     location: ''
   });
-  const [sortBy, setSortBy] = useState('newest');
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(6);
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await getAllCategories();
-        setCategories(response.data.categories || []);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-        toast.error('Failed to load categories');
-      }
-    };
     fetchCategories();
-  }, []);
-
-  useEffect(() => {
     fetchItems();
   }, [activeTab]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await getAllCategories();
+      setCategories(response.data.categories || []);
+    } catch (error) {
+      toast.error('Failed to load categories');
+    }
+  };
 
   const fetchItems = async () => {
     setLoading(true);
     try {
-      const response = await (activeTab === 'pets' ? getAllPets() : getAllAccessories());
-      setItems(response?.data?.[activeTab] || []);
+      let petsData = [];
+      let accessoriesData = [];
+
+      if (activeTab === 'all' || activeTab === 'pets') {
+        const petsResponse = await getAllPets();
+        petsData = petsResponse.data.pets || [];
+      }
+
+      if (activeTab === 'all' || activeTab === 'accessories') {
+        const accessoriesResponse = await getAllAccessories();
+        accessoriesData = accessoriesResponse.data.accessories || [];
+      }
+
+      const combinedItems = activeTab === 'all' 
+        ? [...petsData, ...accessoriesData]
+        : activeTab === 'pets' 
+          ? petsData 
+          : accessoriesData;
+
+      setItems(combinedItems);
     } catch (error) {
       toast.error('Error fetching items');
     }
@@ -157,12 +178,15 @@ const Search = () => {
   };
 
   const filteredItems = items.filter(item => {
-    return (
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (filters.category === '' || item.category === filters.category) &&
-      (filters.minPrice === '' || item.price >= Number(filters.minPrice)) &&
-      (filters.maxPrice === '' || item.price <= Number(filters.maxPrice))
-    );
+    const matchesSearchTerm = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = !filters.category || item.category === filters.category;
+    const matchesMinPrice = !filters.minPrice || item.price >= Number(filters.minPrice);
+    const matchesMaxPrice = !filters.maxPrice || item.price <= Number(filters.maxPrice);
+    const isCorrectType = activeTab === 'all' || 
+      (activeTab === 'pets' && 'breed' in item) || 
+      (activeTab === 'accessories' && !('breed' in item));
+
+    return matchesSearchTerm && matchesCategory && matchesMinPrice && matchesMaxPrice && isCorrectType;
   });
 
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
@@ -172,8 +196,8 @@ const Search = () => {
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
-    setFilters(prevFilters => ({
-      ...prevFilters,
+    setFilters(prev => ({
+      ...prev,
       [name]: value
     }));
     setCurrentPage(1);
@@ -187,6 +211,11 @@ const Search = () => {
     setCurrentPage(pageNumber);
   };
 
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    setCurrentPage(1);
+  };
+
   return (
     <StyledSearch>
       <Container>
@@ -195,6 +224,17 @@ const Search = () => {
             <FilterSection>
               <h4>Filter</h4>
               <div className="mb-3">
+                <Form.Check
+                  type="radio"
+                  id="all"
+                  label="All"
+                  checked={activeTab === 'all'}
+                  onChange={() => {
+                    setActiveTab('all');
+                    setCurrentPage(1);
+                    setFilters(prev => ({ ...prev, category: '' }));
+                  }}
+                />
                 <Form.Check
                   type="radio"
                   id="pets"
@@ -213,38 +253,54 @@ const Search = () => {
                   onChange={() => {
                     setActiveTab('accessories');
                     setCurrentPage(1);
+                    setFilters(prev => ({ ...prev, category: '' }));
                   }}
                 />
               </div>
-              {activeTab === 'pets' && (
+
+              {(activeTab === 'pets' || activeTab === 'all') && (
                 <Form.Group className="mb-3">
                   <Form.Label>Category</Form.Label>
                   <Form.Select name="category" value={filters.category} onChange={handleFilterChange}>
-                    <option value="">All</option>
+                    <option value="">All Categories</option>
                     {categories.map((category) => (
-                      <option key={category._id} value={category._id}>
+                      <option key={category._id} value={category.name}>
                         {category.name}
                       </option>
                     ))}
                   </Form.Select>
                 </Form.Group>
               )}
+
               <Form.Group className="mb-3">
                 <Form.Label>Price Range</Form.Label>
                 <Row>
                   <Col>
-                    <Form.Control type="number" placeholder="Min" name="minPrice" value={filters.minPrice} onChange={handleFilterChange} />
+                    <Form.Control 
+                      type="number" 
+                      placeholder="Min" 
+                      name="minPrice" 
+                      value={filters.minPrice} 
+                      onChange={handleFilterChange}
+                    />
                   </Col>
                   <Col>
-                    <Form.Control type="number" placeholder="Max" name="maxPrice" value={filters.maxPrice} onChange={handleFilterChange} />
+                    <Form.Control 
+                      type="number" 
+                      placeholder="Max" 
+                      name="maxPrice" 
+                      value={filters.maxPrice} 
+                      onChange={handleFilterChange}
+                    />
                   </Col>
                 </Row>
               </Form.Group>
             </FilterSection>
           </Col>
+
           <Col lg={9}>
             <SearchSection>
-              <Form>
+              <Form onSubmit={handleSearchSubmit}>
                 <Row className="align-items-center">
                   <Col sm={9}>
                     <Form.Control 
@@ -258,7 +314,11 @@ const Search = () => {
                     />
                   </Col>
                   <Col sm={3}>
-                    <Button variant="success" className="w-100" style={{ backgroundColor: '#0a6638', borderColor: '#0a6638' }}>
+                    <Button 
+                      type="submit" 
+                      className="w-100" 
+                      style={{ backgroundColor: '#0a6638', borderColor: '#0a6638' }}
+                    >
                       <FaSearch className="me-2" />
                       Search
                     </Button>
@@ -266,10 +326,13 @@ const Search = () => {
                 </Row>
               </Form>
             </SearchSection>
-            
+
             <h2 className="my-4">
-              {activeTab === 'pets' ? 'Pet Breeds' : 'Pet Accessories'}
+              {activeTab === 'pets' ? 'Pet Breeds' : 
+               activeTab === 'accessories' ? 'Pet Accessories' : 
+               'All Items'}
             </h2>
+
             <Row>
               {loading ? (
                 [...Array(6)].map((_, index) => (
@@ -293,25 +356,25 @@ const Search = () => {
                       <div className="content">
                         <div className="d-flex align-items-center mb-2">
                           <h4>{item.name}</h4>
-                          {activeTab === 'pets' && (
-                            <VerifiedBadge>VERIFIED</VerifiedBadge>
-                          )}
+                          {'breed' in item && <Badge type="verified">VERIFIED</Badge>}
                         </div>
                         <div className="mb-2">
                           <strong>₹ {item.price}</strong>
                         </div>
-                        <div>{item.category}</div>
-                        <div>{item.breed}</div>
-                        <div className="mt-3">
-                          <Button 
-                            variant="outline-success"
-                            onClick={() => handleViewDetails(item)}
-                            className="w-100"
-                            style={{ borderColor: '#0a6638', color: '#0a6638' }}
-                          >
-                            View Details
-                          </Button>
-                        </div>
+                        <BadgeContainer>
+                         { 'category' in item && <Badge type="label">Type: {item.category}</Badge>}
+                          {'breed' in item && <Badge type="label">Breed: {item.breed}</Badge>}
+                        </BadgeContainer>
+                      </div>
+                      <div className="button-container">
+                        <Button 
+                          variant="outline-success"
+                          onClick={() => handleViewDetails(item)}
+                          className="w-100"
+                          style={{ borderColor: '#0a6638', color: '#0a6638' }}
+                        >
+                          View Details
+                        </Button>
                       </div>
                     </PetCard>
                   </Col>
@@ -322,6 +385,7 @@ const Search = () => {
                 </Col>
               )}
             </Row>
+
             {!loading && totalPages > 1 && (
               <PaginationContainer>
                 <Pagination>

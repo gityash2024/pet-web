@@ -4,7 +4,7 @@ import { FaSearch, FaFilter, FaTimes, FaBook } from 'react-icons/fa';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { getAllArticles } from '../contexts/api';
+import { getAllArticles, getAllCategories } from '../contexts/api';
 import { toast } from 'react-toastify';
 import DOMPurify from 'dompurify';
 import profileImage from '../assets/profile.png';
@@ -82,24 +82,25 @@ const FilterTag = styled.div`
 
 const KnowledgeHub = () => {
   const [articles, setArticles] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     search: '',
     categories: [],
   });
 
-  const categories = [
-    'Training', 'Health', 'Nutrition', 
-    'Care', 'Behavior', 'Lifestyle'
-  ];
-
   const fetchArticles = async () => {
     try {
       setLoading(true);
-      const response = await getAllArticles();
-      setArticles(response.data.articles || []);
+      const [articlesResponse, categoriesResponse] = await Promise.all([
+        getAllArticles(),
+        getAllCategories()
+      ]);
+      setArticles(articlesResponse.data.articles || []);
+      const categoryNames = categoriesResponse.data.categories.map(cat => cat.name);
+      setCategories(categoryNames);
     } catch (error) {
-      toast.error('Failed to fetch articles');
+      toast.error('Failed to fetch articles and categories');
     } finally {
       setLoading(false);
     }
