@@ -117,6 +117,7 @@ const Profile = ({ isDarkMode }) => {
             </Card.Body>
             <ListGroup variant="flush">
   <StyledListGroupItem action href="/profile" active>My Account</StyledListGroupItem>
+  <StyledListGroupItem action href="/messages" >Messages</StyledListGroupItem>
   <StyledListGroupItem action onClick={() => navigate('/add-advert', { state: { tab: 'my-adverts' } })}>My Adverts</StyledListGroupItem>
   <StyledListGroupItem action onClick={() => navigate('/add-advert', { state: { tab: 'favourite-adverts' } })}>Favourite Adverts</StyledListGroupItem>
   <StyledListGroupItem action onClick={handleLogout}>Log Out</StyledListGroupItem>

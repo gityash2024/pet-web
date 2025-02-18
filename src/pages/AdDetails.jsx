@@ -6,6 +6,8 @@ import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { startConversation } from '../contexts/api';
+import { Email, Person, Publish } from '@mui/icons-material';
+import { Copy } from 'lucide-react';
 
 const Spinner = styled.div`
   border: 2px solid #f3f3f3;
@@ -73,6 +75,7 @@ const AdDetails = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const ad = location.state?.advert;
+  console.log(ad,'----------_____---____-Add details-____--____--____---___---____-')
 
   const handleStartConversation = async () => {
     const token = localStorage.getItem('token');
@@ -108,6 +111,12 @@ const AdDetails = () => {
     return null;
   }
 
+  const formatDate = (dateString) => {  
+    const date = new Date(dateString);
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+  };
+
   return (
     <StyledAdDetails>
       <Container>
@@ -142,12 +151,20 @@ const AdDetails = () => {
               >
                 <h3>Contact Information</h3>
                 <ContactInfo>
-                  <FaPaw />
-                  <span>Age: {ad.age} years</span>
+                  <Person />
+                  <span>Owner Name: {ad.owner?.name}</span>
                 </ContactInfo>
                 <ContactInfo>
-                  <FaPhone />
-                  <span>Breed: {ad.breed}</span>
+                  <Email />
+                  <span>Email: {ad.owner?.email} <span style={{ cursor: 'pointer' }} onClick={() => {navigator.clipboard.writeText(ad.owner?.email); toast.success('Email copied  ');}}><Copy/></span></span>
+                </ContactInfo>
+                <ContactInfo>
+                  <Publish />
+                  <span>Published At: {formatDate(ad?.updatedAt)} </span>
+                </ContactInfo>
+                <ContactInfo>
+                  <FaPaw />
+                  {ad?.breed && <span>Breed: {ad.breed}</span>}
                 </ContactInfo>
                 <StyledButton 
                   className="w-100 mt-3" 

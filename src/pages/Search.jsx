@@ -29,7 +29,7 @@ const FilterSection = styled.div`
   margin-bottom: 20px;
 `;
 
-const PetCard = styled(motion.div)`
+const PetCard = styled(motion.div)` 
   background: #fff;
   border-radius: 10px;
   overflow: hidden;
@@ -133,7 +133,18 @@ const Search = () => {
   const [categories, setCategories] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(6);
-
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryParam = urlParams.get('category');
+    
+    if (categoryParam) {
+      setActiveTab('pets');  // Since categories are only for pets
+      setFilters(prev => ({
+        ...prev,
+        category: categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1)  // Capitalize first letter
+      }));
+    }
+  }, []);
   useEffect(() => {
     fetchCategories();
     fetchItems();

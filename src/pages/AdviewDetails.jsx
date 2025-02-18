@@ -72,6 +72,8 @@ const AdviewDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const ad = location.state?.advert;
+
+  console.log(ad,'----------_____---____--Add view details____--____--____---___---____-')
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -194,11 +196,11 @@ const AdviewDetails = () => {
             >
               <h3>Contact Information</h3>
               <ContactInfo>
-                <FaPaw />
+                <FaHeart />
                 <span>Age: {ad.age} years</span>
               </ContactInfo>
               <ContactInfo>
-                <FaPhone />
+                <FaPaw />
                 <span>Breed: {ad.breed}</span>
               </ContactInfo>
             </GlassmorphicCard>
