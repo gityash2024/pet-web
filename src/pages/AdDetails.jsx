@@ -154,17 +154,14 @@ const AdDetails = () => {
                   <Person />
                   <span>Owner Name: {ad.owner?.name}</span>
                 </ContactInfo>
-                <ContactInfo>
-                  <Email />
-                  <span>Email: {ad.owner?.email} <span style={{ cursor: 'pointer' }} onClick={() => {navigator.clipboard.writeText(ad.owner?.email); toast.success('Email copied  ');}}><Copy/></span></span>
-                </ContactInfo>
+              
                 <ContactInfo>
                   <Publish />
                   <span>Published At: {formatDate(ad?.updatedAt)} </span>
                 </ContactInfo>
                 <ContactInfo>
                   <FaPaw />
-                  {ad?.breed && <span>Breed: {ad.breed}</span>}
+                  {ad?.category && <span>Category: {ad.category}</span>}
                 </ContactInfo>
                 <StyledButton 
                   className="w-100 mt-3" 
