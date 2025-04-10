@@ -381,7 +381,18 @@ const AddAdvert = ({ isDarkMode }) => {
     price: '',
     category: '',
     location: '',
-    image: ''
+    breed: '',
+    age: '',
+    gender: '',
+    healthStatus: '',
+    vaccinationDetails: {
+      firstVaccination: false,
+      deworming: false,
+      boosters: false
+    },
+    vaccinationCertificates: [],
+    vetHealthCertificate: '',
+    microchipId: '',
   });
   const [filter, setFilter] = useState({ category: 'all', sort: 'newest' });
 
@@ -429,10 +440,21 @@ const AddAdvert = ({ isDarkMode }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
+    setFormData({
+      ...formData,
       [name]: value
-    }));
+    });
+  };
+
+  const handleCheckboxChange = (e) => {
+    const { name, checked } = e.target;
+    setFormData({
+      ...formData,
+      vaccinationDetails: {
+        ...formData.vaccinationDetails,
+        [name]: checked
+      }
+    });
   };
 
   const handleImageUpload = async (event) => {
@@ -466,6 +488,21 @@ const AddAdvert = ({ isDarkMode }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate minimum age for dogs
+    if (formData.category.toLowerCase() === 'dog' && formData.age) {
+      const ageValue = parseInt(formData.age);
+      const ageUnit = formData.ageUnit || 'weeks';
+      
+      if (ageUnit === 'weeks' && ageValue < 8) {
+        toast.error('Dogs must be at least 8 weeks old');
+        return;
+      } else if (ageUnit === 'months' && ageValue < 2) {
+        toast.error('Dogs must be at least 2 months old');
+        return;
+      }
+    }
+    
     setLoading(true);
     try {
       const submitData = {
@@ -514,7 +551,15 @@ const AddAdvert = ({ isDarkMode }) => {
       price: advert.price,
       category: advert.category,
       location: advert.location,
-      image: advert.image
+      image: advert.image,
+      breed: advert.breed,
+      age: advert.age,
+      gender: advert.gender,
+      healthStatus: advert.healthStatus,
+      vaccinationDetails: advert.vaccinationDetails,
+      vaccinationCertificates: advert.vaccinationCertificates,
+      vetHealthCertificate: advert.vetHealthCertificate,
+      microchipId: advert.microchipId,
     });
     setShowModal(true);
   };
@@ -526,7 +571,18 @@ const AddAdvert = ({ isDarkMode }) => {
       price: '',
       category: '',
       location: '',
-      image: ''
+      breed: '',
+      age: '',
+      gender: '',
+      healthStatus: '',
+      vaccinationDetails: {
+        firstVaccination: false,
+        deworming: false,
+        boosters: false
+      },
+      vaccinationCertificates: [],
+      vetHealthCertificate: '',
+      microchipId: '',
     });
     setEditingAdvert(null);
   };
@@ -893,6 +949,166 @@ const AddAdvert = ({ isDarkMode }) => {
                 )}
               </Form.Group>
 
+              {/* Pet Information Section */}
+              <div className="mb-4">
+                <h4>Pet Information</h4>
+                <hr />
+                
+                <Form.Group className="mb-3">
+                  <Form.Label>Species/Breed*</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="breed"
+                    value={formData.breed}
+                    onChange={handleChange}
+                    placeholder="e.g., French Bulldog"
+                    required
+                  />
+                </Form.Group>
+
+                <Row className="mb-3">
+                  <Col md={6}>
+                    <Form.Group>
+                      <Form.Label>Age*</Form.Label>
+                      <Row>
+                        <Col xs={6}>
+                          <Form.Control
+                            type="number"
+                            name="age"
+                            value={formData.age}
+                            onChange={handleChange}
+                            placeholder="Age"
+                            min={formData.category.toLowerCase() === 'dog' ? 8 : 0}
+                            required
+                          />
+                        </Col>
+                        <Col xs={6}>
+                          <Form.Select
+                            style={{marginTop: '10px'}}
+                            name="ageUnit"
+                            value={formData.ageUnit}
+                            onChange={handleChange}
+                            required
+                          >
+                            <option value="weeks">Weeks</option>
+                            <option value="months">Months</option>
+                            <option value="years">Years</option>
+                          </Form.Select>
+                        </Col>
+                      </Row>
+                      {formData.category.toLowerCase() === 'dog' && (
+                        <Form.Text className="text-muted">
+                          Minimum age for dogs is 8 weeks
+                        </Form.Text>
+                      )}
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group>
+                      <Form.Label>Sex*</Form.Label>
+                      <Form.Select
+                        name="gender"
+                        value={formData.gender}
+                        onChange={handleChange}
+                        required
+                      >
+                        <option value="">Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="mixed">Mixed (for multiple pets)</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Health Status*</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    name="healthStatus"
+                    value={formData.healthStatus}
+                    onChange={handleChange}
+                    placeholder="Describe the pet's health status"
+                    rows={3}
+                    required
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Vaccination Details</Form.Label>
+                  <div className="d-flex flex-column">
+                    <Form.Check
+                      type="checkbox"
+                      label="First vaccination"
+                      name="firstVaccination"
+                      checked={formData.vaccinationDetails.firstVaccination}
+                      onChange={handleCheckboxChange}
+                      className="mb-2"
+                    />
+                    <Form.Check
+                      type="checkbox"
+                      label="Deworming"
+                      name="deworming"
+                      checked={formData.vaccinationDetails.deworming}
+                      onChange={handleCheckboxChange}
+                      className="mb-2"
+                    />
+                    <Form.Check
+                      type="checkbox"
+                      label="Boosters"
+                      name="boosters"
+                      checked={formData.vaccinationDetails.boosters}
+                      onChange={handleCheckboxChange}
+                      className="mb-2"
+                    />
+                  </div>
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Vaccination Certificates</Form.Label>
+                  <Form.Control
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.pdf"
+                    multiple
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files);
+                      setFormData({
+                        ...formData,
+                        vaccinationCertificates: files
+                      });
+                    }}
+                  />
+                  <Form.Text className="text-muted">
+                    Upload images or PDFs of vaccination certificates
+                  </Form.Text>
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Veterinary Health Certificate</Form.Label>
+                  <Form.Control
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.pdf"
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        vetHealthCertificate: e.target.files[0]
+                      });
+                    }}
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Microchip/Tag ID</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="microchipId"
+                    value={formData.microchipId}
+                    onChange={handleChange}
+                    placeholder="Enter microchip or tag ID if available"
+                  />
+                </Form.Group>
+              </div>
+              
               <div className="d-flex justify-content-end">
                 <Button
                   variant="outline-secondary"

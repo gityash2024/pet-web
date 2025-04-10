@@ -70,6 +70,50 @@ const AdImage = styled.img`
   margin-bottom: 20px;
 `;
 
+const DetailSection = styled.div`
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  
+  h4 {
+    color: #0a6638;
+    margin-bottom: 15px;
+  }
+`;
+
+const DetailItem = styled.div`
+  display: flex;
+  margin-bottom: 10px;
+  
+  .label {
+    font-weight: bold;
+    width: 150px;
+    color: #666;
+  }
+  
+  .value {
+    flex: 1;
+  }
+`;
+
+const VaccinationBadge = styled(Badge)`
+  margin-right: 10px;
+  background-color: ${props => props.active ? '#0a6638' : '#e0e0e0'};
+  color: ${props => props.active ? 'white' : '#666'};
+  padding: 8px 12px;
+`;
+
+const CertificateLink = styled.a`
+  color: #0a6638;
+  text-decoration: underline;
+  display: inline-block;
+  margin-right: 10px;
+  
+  &:hover {
+    color: #084a29;
+  }
+`;
+
 const AdDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -141,6 +185,69 @@ const AdDetails = () => {
                 <span>{ad.location}</span>
               </ContactInfo>
               <p>{ad.description}</p>
+              
+              {/* Pet Information Section */}
+              <DetailSection>
+                <h4>Pet Information</h4>
+                
+                <DetailItem>
+                  <div className="label">Species/Breed:</div>
+                  <div className="value">{ad.breed || 'Not specified'}</div>
+                </DetailItem>
+                
+                <DetailItem>
+                  <div className="label">Age:</div>
+                  <div className="value">{ad.age ? `${ad.age} ${ad.ageUnit || 'weeks'}` : 'Not specified'}</div>
+                </DetailItem>
+                
+                <DetailItem>
+                  <div className="label">Sex:</div>
+                  <div className="value">{ad.gender || 'Not specified'}</div>
+                </DetailItem>
+                
+                <DetailItem>
+                  <div className="label">Health Status:</div>
+                  <div className="value">{ad.healthStatus || 'Not specified'}</div>
+                </DetailItem>
+                
+                {/* Vaccination Details */}
+                <DetailItem>
+                  <div className="label">Vaccination:</div>
+                  <div className="value">
+                    <VaccinationBadge active={ad.vaccinationDetails?.firstVaccination}>
+                      First vaccination
+                    </VaccinationBadge>
+                    <VaccinationBadge active={ad.vaccinationDetails?.deworming}>
+                      Deworming
+                    </VaccinationBadge>
+                    <VaccinationBadge active={ad.vaccinationDetails?.boosters}>
+                      Boosters
+                    </VaccinationBadge>
+                  </div>
+                </DetailItem>
+                
+                {/* Certificates */}
+                {ad.vaccinationCertificates && ad.vaccinationCertificates.length > 0 && (
+                  <DetailItem>
+                    <div className="label">Certificates:</div>
+                    <div className="value">
+                      {ad.vaccinationCertificates.map((cert, index) => (
+                        <CertificateLink href={cert} target="_blank" key={index}>
+                          Certificate {index + 1}
+                        </CertificateLink>
+                      ))}
+                    </div>
+                  </DetailItem>
+                )}
+                
+                {/* Microchip ID */}
+                {ad.microchipId && (
+                  <DetailItem>
+                    <div className="label">Microchip/Tag ID:</div>
+                    <div className="value">{ad.microchipId}</div>
+                  </DetailItem>
+                )}
+              </DetailSection>
             </GlassmorphicCard>
           </Col>
           <Col lg={4}>
