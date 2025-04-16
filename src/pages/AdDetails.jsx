@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import { startConversation } from '../contexts/api';
 import { Email, Person, Publish } from '@mui/icons-material';
 import { Copy } from 'lucide-react';
+import { IconButton } from '@mui/material';
 
 const Spinner = styled.div`
   border: 2px solid #f3f3f3;
@@ -188,7 +189,7 @@ const AdDetails = () => {
               
               {/* Pet Information Section */}
               <DetailSection>
-                <h4>Pet Information</h4>
+                <h4><FaPaw className="me-2" />Pet Information</h4>
                 
                 <DetailItem>
                   <div className="label">Species/Breed:</div>
@@ -202,7 +203,11 @@ const AdDetails = () => {
                 
                 <DetailItem>
                   <div className="label">Sex:</div>
-                  <div className="value">{ad.gender || 'Not specified'}</div>
+                  <div className="value">
+                    {ad.gender ? 
+                      ad.gender.charAt(0).toUpperCase() + ad.gender.slice(1) : 
+                      'Not specified'}
+                  </div>
                 </DetailItem>
                 
                 <DetailItem>
@@ -226,10 +231,10 @@ const AdDetails = () => {
                   </div>
                 </DetailItem>
                 
-                {/* Certificates */}
+                {/* Vaccination Certificates */}
                 {ad.vaccinationCertificates && ad.vaccinationCertificates.length > 0 && (
                   <DetailItem>
-                    <div className="label">Certificates:</div>
+                    <div className="label">Vaccination Certificates:</div>
                     <div className="value">
                       {ad.vaccinationCertificates.map((cert, index) => (
                         <CertificateLink href={cert} target="_blank" key={index}>
@@ -240,11 +245,37 @@ const AdDetails = () => {
                   </DetailItem>
                 )}
                 
+                {/* Veterinary Health Certificate */}
+                {ad.vetHealthCertificate && (
+                  <DetailItem>
+                    <div className="label">Veterinary Certificate:</div>
+                    <div className="value">
+                      <CertificateLink href={ad.vetHealthCertificate} target="_blank">
+                        View Certificate
+                      </CertificateLink>
+                    </div>
+                  </DetailItem>
+                )}
+                
                 {/* Microchip ID */}
                 {ad.microchipId && (
                   <DetailItem>
                     <div className="label">Microchip/Tag ID:</div>
-                    <div className="value">{ad.microchipId}</div>
+                    <div className="value">
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        {ad.microchipId}
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            navigator.clipboard.writeText(ad.microchipId);
+                            toast.success('ID copied to clipboard');
+                          }}
+                          style={{ marginLeft: '8px', padding: '4px' }}
+                        >
+                          <Copy size={16} />
+                        </IconButton>
+                      </div>
+                    </div>
                   </DetailItem>
                 )}
               </DetailSection>

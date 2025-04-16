@@ -4,10 +4,16 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { FaFacebook, FaInstagram, FaTwitter, FaGoogle, FaApple } from 'react-icons/fa';
 
-const StyledFooter = styled.footer`
-  background-color: #0a6638;
+const FooterContainer = styled.footer`
+  background-color: ${props => props.isDarkMode ? '#222' : '#0a6638'};
   color: #fff;
-  padding: 3rem 0 0;
+  padding: 2rem 0 0;
+  margin-top: 2rem;
+  
+  @media (max-width: 768px) {
+    padding-bottom: 0; /* Remove padding to ensure footer touches bottom nav */
+    margin-bottom: 0; /* Remove margin to ensure footer touches bottom nav */
+  }
 `;
 
 const FooterSection = styled.div`
@@ -66,9 +72,15 @@ const BottomBar = styled.div`
   }
 `;
 
-const Footer = () => {
+const AppDownloadSection = styled(FooterSection)`
+  @media (max-width: 768px) {
+    display: none; /* Hide the app download section on mobile */
+  }
+`;
+
+const Footer = ({ isDarkMode }) => {
   return (
-    <StyledFooter>
+    <FooterContainer isDarkMode={isDarkMode}>
       <Container>
         <Row>
           <Col md={3}>
@@ -110,7 +122,7 @@ const Footer = () => {
             </FooterSection>
           </Col>
           <Col md={3}>
-            <FooterSection>
+            <AppDownloadSection>
               <h5>Download Our App</h5>
               <p>Get the best pet shopping experience on our mobile app</p>
               <AppButtons>
@@ -121,7 +133,7 @@ const Footer = () => {
                   <FaApple /> App Store
                 </a>
               </AppButtons>
-            </FooterSection>
+            </AppDownloadSection>
           </Col>
         </Row>
       </Container>
@@ -138,7 +150,7 @@ const Footer = () => {
           </Row>
         </Container>
       </BottomBar>
-    </StyledFooter>
+    </FooterContainer>
   );
 };
 

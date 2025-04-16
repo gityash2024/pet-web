@@ -529,6 +529,20 @@ const Home = () => {
         advert: {
           ...pet,
           title: pet.name,
+          name: pet.name,
+          breed: pet.breed || pet.category,
+          age: pet.age || '',
+          ageUnit: pet.ageUnit || 'weeks',
+          gender: pet.gender || '',
+          healthStatus: pet.healthStatus || '',
+          vaccinationDetails: pet.vaccinationDetails || {
+            firstVaccination: false,
+            deworming: false,
+            boosters: false
+          },
+          vaccinationCertificates: pet.vaccinationCertificates || [],
+          vetHealthCertificate: pet.vetHealthCertificate || '',
+          microchipId: pet.microchipId || '',
           images: [pet.images?.[0] || cardImage]
         }
       }

@@ -11,6 +11,7 @@ import { toast } from 'react-toastify';
 import profileImage from '../assets/profile.png';
 import { FaThLarge, FaList, FaCalendar } from 'react-icons/fa';
 import { Delete, Edit } from 'lucide-react';
+import { uploadFile } from '../utils/fileUpload';
 
 const StyledAddAdvert = styled.div`
   min-height: 100vh;
@@ -383,6 +384,7 @@ const AddAdvert = ({ isDarkMode }) => {
     location: '',
     breed: '',
     age: '',
+    ageUnit: 'weeks',
     gender: '',
     healthStatus: '',
     vaccinationDetails: {
@@ -461,26 +463,13 @@ const AddAdvert = ({ isDarkMode }) => {
     const file = event.target.files[0];
     try {
       setLoading(true);
-      const formData = new FormData();
-      formData.append("file", file);
-      const response = await fetch(
-        "https://chirag-backend.onrender.com/api/files/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-      if (!response.ok) {
-        throw new Error(`Failed to upload file: ${response.statusText}`);
-      }
-      const responseData = await response.json();
-      const uploadedUrl = responseData.fileUrl;
+      const result = await uploadFile(file, localStorage.getItem('token'));
       setFormData(prevState => ({
         ...prevState,
-        image: uploadedUrl
+        image: result.fileUrl
       }));
     } catch (error) {
-      toast.error(`Error uploading file: ${error.message}`);
+      // Error is already handled in the uploadFile function
     } finally {
       setLoading(false);
     }
@@ -488,6 +477,27 @@ const AddAdvert = ({ isDarkMode }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!formData.breed) {
+      toast.error('Species/Breed is required');
+      return;
+    }
+    
+    if (!formData.age) {
+      toast.error('Age is required');
+      return;
+    }
+    
+    if (!formData.gender) {
+      toast.error('Sex is required');
+      return;
+    }
+    
+    if (!formData.healthStatus) {
+      toast.error('Health status is required');
+      return;
+    }
     
     // Validate minimum age for dogs
     if (formData.category.toLowerCase() === 'dog' && formData.age) {
@@ -505,8 +515,28 @@ const AddAdvert = ({ isDarkMode }) => {
     
     setLoading(true);
     try {
+      // Handle file uploads for certificates if they are File objects
+      let processedData = { ...formData };
+      
+      // Process vaccination certificates if they are File objects
+      if (formData.vaccinationCertificates && formData.vaccinationCertificates.length > 0 && 
+          formData.vaccinationCertificates[0] instanceof File) {
+        const certificateUrls = [];
+        for (const file of formData.vaccinationCertificates) {
+          const result = await uploadFile(file, localStorage.getItem('token'));
+          certificateUrls.push(result.fileUrl);
+        }
+        processedData.vaccinationCertificates = certificateUrls;
+      }
+      
+      // Process vet health certificate if it's a File object
+      if (formData.vetHealthCertificate && formData.vetHealthCertificate instanceof File) {
+        const result = await uploadFile(formData.vetHealthCertificate, localStorage.getItem('token'));
+        processedData.vetHealthCertificate = result.fileUrl;
+      }
+      
       const submitData = {
-        ...formData,
+        ...processedData,
         owner: userId
       };
 
@@ -552,14 +582,20 @@ const AddAdvert = ({ isDarkMode }) => {
       category: advert.category,
       location: advert.location,
       image: advert.image,
-      breed: advert.breed,
-      age: advert.age,
-      gender: advert.gender,
-      healthStatus: advert.healthStatus,
-      vaccinationDetails: advert.vaccinationDetails,
-      vaccinationCertificates: advert.vaccinationCertificates,
-      vetHealthCertificate: advert.vetHealthCertificate,
-      microchipId: advert.microchipId,
+      // Pet Information fields
+      breed: advert.breed || '',
+      age: advert.age || '',
+      ageUnit: advert.ageUnit || 'weeks',
+      gender: advert.gender || '',
+      healthStatus: advert.healthStatus || '',
+      vaccinationDetails: advert.vaccinationDetails || {
+        firstVaccination: false,
+        deworming: false,
+        boosters: false
+      },
+      vaccinationCertificates: advert.vaccinationCertificates || [],
+      vetHealthCertificate: advert.vetHealthCertificate || '',
+      microchipId: advert.microchipId || '',
     });
     setShowModal(true);
   };
@@ -573,6 +609,7 @@ const AddAdvert = ({ isDarkMode }) => {
       location: '',
       breed: '',
       age: '',
+      ageUnit: 'weeks',
       gender: '',
       healthStatus: '',
       vaccinationDetails: {
@@ -592,8 +629,19 @@ const AddAdvert = ({ isDarkMode }) => {
         advert: {
           ...item,
           name: item.title,
-          breed: item.category,
-          age: '',
+          breed: item.breed || item.category,
+          age: item.age || '',
+          ageUnit: item.ageUnit || 'weeks',
+          gender: item.gender || '',
+          healthStatus: item.healthStatus || '',
+          vaccinationDetails: item.vaccinationDetails || {
+            firstVaccination: false,
+            deworming: false,
+            boosters: false
+          },
+          vaccinationCertificates: item.vaccinationCertificates || [],
+          vetHealthCertificate: item.vetHealthCertificate || '',
+          microchipId: item.microchipId || '',
           images: [item.image || profileImage]
         } 
       } 

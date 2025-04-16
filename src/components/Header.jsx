@@ -72,6 +72,20 @@ const StyledNavbar = styled(Navbar)`
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
   }
+  
+  @media (max-width: 768px) {
+    .btn-new-advert, .profile-section > img, .profile-section > button {
+      display: none; /* Hide these elements on mobile as they'll be in bottom nav */
+    }
+    
+    .navbar-toggler {
+      display: none; /* Hide hamburger menu on mobile */
+    }
+    
+    .navbar-collapse {
+      display: none !important; /* Force hide the collapsible menu on mobile */
+    }
+  }
 `;
 
 const AnimalCategories = styled.div`
@@ -113,6 +127,7 @@ const AnimalCategories = styled.div`
   @media (max-width: 768px) {
     padding: 1rem;
     justify-content: ${props => props.itemCount <= 4 ? 'center' : 'flex-start'};
+    display: none; /* Hide categories on mobile */
   }
 `;
 

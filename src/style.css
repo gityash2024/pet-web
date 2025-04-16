@@ -54,3 +54,15 @@
     min-height: 100vh;
     position: relative;
   }
+
+  /* Add bottom margin for mobile screens */
+  @media (max-width: 768px) {
+    body {
+      padding-bottom: 60px; /* Match the height of the bottom navigation */
+    }
+    
+    /* Fix the footer to touch bottom navigation */
+    footer {
+      margin-bottom: 0 !important;
+    }
+  }
