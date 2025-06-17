@@ -187,6 +187,7 @@ const ReadMoreButton = styled(Button)`
   transition: all 0.3s ease;
   border-radius: 8px;
   font-weight: 500;
+  color: #ffffff;
   
   &:hover {
     background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);

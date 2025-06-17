@@ -204,13 +204,14 @@ const ShareButton = styled(Button)`
   color: #ffffff;
   transition: all 0.3s ease;
   margin: 5px;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   padding: 0;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 1rem;
 
   &:hover {
     background: rgba(255, 255, 255, 0.3);
@@ -290,12 +291,45 @@ const KnowledgeHubDetails = () => {
   const [relatedArticles, setRelatedArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [shareOpen, setShareOpen] = useState(false);
+  const [shareButtonPosition, setShareButtonPosition] = useState({ top: 0, left: 0 });
   const { id } = useParams();
   const navigate = useNavigate();
+  const shareModalRef = React.useRef(null);
+  const shareButtonRef = React.useRef(null);
 
   useEffect(() => {
     fetchArticleDetails();
   }, [id]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (shareModalRef.current && !shareModalRef.current.contains(event.target) && !event.target.closest('button[variant="outline-light"]')) {
+        setShareOpen(false);
+      }
+    }
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [shareModalRef]);
+  
+  useEffect(() => {
+    if (shareOpen && shareButtonRef.current) {
+      const rect = shareButtonRef.current.getBoundingClientRect();
+      const windowWidth = window.innerWidth;
+      
+      // Calculate left position ensuring the modal doesn't go off-screen
+      let leftPos = rect.right - 130; // Align right edge of modal with right edge of button
+      if (leftPos < 10) leftPos = 10; // Ensure at least 10px from left edge
+      if (leftPos + 130 > windowWidth - 10) leftPos = windowWidth - 140; // Ensure at least 10px from right edge
+      
+      setShareButtonPosition({
+        top: rect.bottom + window.scrollY + 5, // Add 5px gap
+        left: leftPos,
+      });
+    }
+  }, [shareOpen]);
 
   const fetchArticleDetails = async () => {
     try {
@@ -430,6 +464,7 @@ const renderRelatedArticles = () => {
                     </MetaInfo>
                     <div className="position-relative ms-auto">
                       <Button
+                        ref={shareButtonRef}
                         variant="outline-light"
                         onClick={() => setShareOpen(!shareOpen)}
                         className="d-flex align-items-center"
@@ -438,20 +473,24 @@ const renderRelatedArticles = () => {
                       </Button>
                       {shareOpen && (
                         <div
+                          ref={shareModalRef}
                           style={{
-                            position: 'absolute',
-                            top: '100%',
-                            right: 0,
+                            position: 'fixed',
+                            top: `${shareButtonPosition.top}px`,
+                            left: `${shareButtonPosition.left}px`,
                             backgroundColor: 'rgba(255, 255, 255, 0.95)',
                             borderRadius: '12px',
                             padding: '15px',
                             boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
-                            zIndex: 10,
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(2, 1fr)',
+                            zIndex: 9999,
+                            display: 'flex',
+                            flexWrap: 'wrap',
                             gap: '10px',
-                            marginTop: '10px',
+                            width: '130px',
+                            justifyContent: 'center',
+                            animation: 'fadeIn 0.2s ease-in-out',
                           }}
+                          className="share-modal"
                         >
                           <ShareButton onClick={() => shareArticle('whatsapp')} style={{ background: '#25D366' }}>
                             <FaWhatsapp />
