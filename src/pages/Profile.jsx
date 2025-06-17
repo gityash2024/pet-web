@@ -10,18 +10,45 @@ import {toast} from 'react-toastify';
 
 const StyledContainer = styled(Container)`
   margin-top: 80px;
+  padding-bottom: 40px;
 `;
+
+const PageWrapper = styled.div`
+  background: linear-gradient(to bottom, var(--background-light), var(--background-highlight));
+  min-height: 100vh;
+  padding: 20px 0;
+`;
+
 const StyledListGroupItem = styled(ListGroup.Item)`
+  background: linear-gradient(135deg, var(--background-light) 0%, var(--background-highlight) 100%);
+  border: 1px solid rgba(251, 194, 31, 0.1);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: linear-gradient(135deg, var(--background-highlight) 0%, var(--secondary-lighter) 100%);
+  }
+  
   &.active {
-    background-color: #0a6638 !important;
-    border-color: #0a6638 !important;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+    border-color: var(--primary) !important;
     color: #ffffff !important;
   }
 `;
+
+const ProfileCard = styled(Card)`
+  background: linear-gradient(135deg, var(--background-light) 0%, var(--background-highlight) 100%);
+  border: 1px solid rgba(251, 194, 31, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  overflow: hidden;
+`;
+
 const ProfileImage = styled(Image)`
   width: 150px;
   height: 150px;
   object-fit: cover;
+  border: 3px solid var(--primary-light);
+  border-radius: 50%;
 `;
 
 const EditIcon = styled(BsPencil)`
@@ -29,13 +56,88 @@ const EditIcon = styled(BsPencil)`
   position: absolute;
   bottom: 5px;
   right: 5px;
-  background-color: white;
+  background-color: var(--primary);
+  color: white;
   border-radius: 50%;
   padding: 5px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: var(--primary-dark);
+    transform: scale(1.1);
+  }
+`;
+
+const FormSection = styled(Card)`
+  background: linear-gradient(135deg, var(--background-light) 0%, var(--background-highlight) 100%);
+  border: 1px solid rgba(251, 194, 31, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+`;
+
+const SectionTitle = styled(Card.Title)`
+  color: var(--primary);
+  font-weight: 600;
+  border-bottom: 1px solid rgba(251, 194, 31, 0.3);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+`;
+
+const StyledFormLabel = styled(Form.Label)`
+  color: var(--primary);
+  font-weight: 500;
+`;
+
+const StyledFormControl = styled(Form.Control)`
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  padding: 10px 15px;
+  
+  &:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 0.2rem rgba(215, 118, 32, 0.25);
+  }
+`;
+
+const StyledCheckbox = styled(Form.Check)`
+  .form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+  }
+  
+  .form-check-label {
+    color: var(--primary-dark);
+  }
+`;
+
+const UpdateButton = styled(Button)`
+  background: var(--primary);
+  border: none;
+  padding: 10px 20px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+  }
+`;
+
+const CompletionBadge = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  font-weight: 500;
+  margin-top: 10px;
+  
+  svg {
+    margin-right: 5px;
+  }
 `;
 
 const Profile = ({ isDarkMode }) => {
-    const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState({
     name: '',
     email: '',
@@ -97,136 +199,148 @@ const Profile = ({ isDarkMode }) => {
   };
 
   return (
-    <StyledContainer>
-      <h1 className="mb-4">My Account</h1>
-      {error && <Alert variant="danger">{error}</Alert>}
-      <Row>
-        <Col md={3}>
-          <Card bg={isDarkMode ? 'dark' : 'light'} text={isDarkMode ? 'light' : 'dark'}>
-            <Card.Body>
-              <div style={{ position: 'relative', width: 'fit-content', margin: '0 auto' }}>
-                <ProfileImage src={profileIcon}  />
-                <EditIcon />
-              </div>
-              <Card.Title className="text-center mt-3">{userData.name?.toUpperCase()}</Card.Title>
-              {userData.profileCompletionPercentage === 100 && (
-                <div className="text-center text-success">
-                  <BsCheckCircleFill /> Profile Complete
+    <PageWrapper>
+      <StyledContainer>
+        <h1 className="mb-4" style={{ color: 'var(--primary)' }}>My Account</h1>
+        {error && <Alert variant="danger">{error}</Alert>}
+        <Row>
+          <Col md={3}>
+            <ProfileCard>
+              <Card.Body>
+                <div style={{ position: 'relative', width: 'fit-content', margin: '0 auto' }}>
+                  <ProfileImage src={profileIcon} />
+                  <EditIcon />
                 </div>
-              )}
-            </Card.Body>
-            <ListGroup variant="flush">
-  <StyledListGroupItem action onClick={() => navigate('/profile')} active>My Account</StyledListGroupItem>
-  <StyledListGroupItem action onClick={() => navigate('/messages')} >Messages</StyledListGroupItem>
-  <StyledListGroupItem action onClick={() => navigate('/add-advert', { state: { tab: 'my-adverts' } })}>My Adverts</StyledListGroupItem>
-  <StyledListGroupItem action onClick={() => navigate('/add-advert', { state: { tab: 'favourite-adverts' } })}>Favourite Adverts</StyledListGroupItem>
-  <StyledListGroupItem action onClick={handleLogout}>Log Out</StyledListGroupItem>
-</ListGroup>
-          </Card>
-        </Col>
-        <Col md={9} className='mb-4'>
-          <Card bg={isDarkMode ? 'dark' : 'light'} text={isDarkMode ? 'light' : 'dark'}>
-            <Card.Body>
-              <Card.Title>General Information</Card.Title>
-              <Form onSubmit={handleSubmit}>
-                <Row>
-                  <Col>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Name</Form.Label>
-                      <Form.Control 
-                        type="text" 
-                        name="name"
-                        value={userData.name} 
-                        onChange={handleInputChange}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Email</Form.Label>
-                      <Form.Control 
-                        type="email" 
-                        name="email"
-                        value={userData.email} 
-                        onChange={handleInputChange}
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-                <Card.Title className="mt-4">Contact Details</Card.Title>
-                <Row>
-                  <Col>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Country</Form.Label>
-                      <Form.Control 
-                        type="text" 
-                        name="country"
-                        value={userData.country} 
-                        onChange={handleInputChange}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col>
-                    <Form.Group className="mb-3">
-                      <Form.Label>State</Form.Label>
-                      <Form.Control 
-                        type="text" 
-                        name="state"
-                        value={userData.state} 
-                        onChange={handleInputChange}
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Phone Number</Form.Label>
-                      <Form.Control 
-                        type="text" 
-                        name="phoneNumber"
-                        value={userData.phoneNumber} 
-                        onChange={handleInputChange}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Postal Code</Form.Label>
-                      <Form.Control 
-                        type="text" 
-                        name="postalCode"
-                        value={userData.postalCode} 
-                        onChange={handleInputChange}
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-                <Form.Group className="mb-3">
-                  <Form.Check 
-                    type="checkbox" 
-                    label="Show phone number on my profile" 
-                    checked={userData.showNumberOnProfile}
-                    onChange={() => setUserData({ ...userData, showNumberOnProfile: !userData.showNumberOnProfile })}
-                  />
-                </Form.Group>
-              
-                  <Button type="submit" className="mt-3" variant="primary" >
+                <Card.Title className="text-center mt-3" style={{ color: 'var(--primary-dark)' }}>
+                  {userData.name?.toUpperCase()}
+                </Card.Title>
+                {userData.profileCompletionPercentage === 100 && (
+                  <CompletionBadge>
+                    <BsCheckCircleFill /> Profile Complete
+                  </CompletionBadge>
+                )}
+              </Card.Body>
+              <ListGroup variant="flush">
+                <StyledListGroupItem action onClick={() => navigate('/profile')} active>My Account</StyledListGroupItem>
+                <StyledListGroupItem action onClick={() => navigate('/messages')}>Messages</StyledListGroupItem>
+                <StyledListGroupItem action onClick={() => navigate('/add-advert', { state: { tab: 'my-adverts' } })}>My Adverts</StyledListGroupItem>
+                <StyledListGroupItem action onClick={() => navigate('/add-advert', { state: { tab: 'favourite-adverts' } })}>Favourite Adverts</StyledListGroupItem>
+                <StyledListGroupItem action onClick={handleLogout}>Log Out</StyledListGroupItem>
+              </ListGroup>
+            </ProfileCard>
+          </Col>
+          <Col md={9} className='mb-4'>
+            <FormSection>
+              <Card.Body>
+                <SectionTitle>General Information</SectionTitle>
+                <Form onSubmit={handleSubmit}>
+                  <Row>
+                    <Col>
+                      <Form.Group className="mb-3">
+                        <StyledFormLabel>Name</StyledFormLabel>
+                        <StyledFormControl 
+                          type="text" 
+                          name="name"
+                          value={userData.name} 
+                          onChange={handleInputChange}
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col>
+                      <Form.Group className="mb-3">
+                        <StyledFormLabel>Email</StyledFormLabel>
+                        <StyledFormControl 
+                          type="email" 
+                          name="email"
+                          value={userData.email} 
+                          onChange={handleInputChange}
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                  <SectionTitle className="mt-4">Contact Details</SectionTitle>
+                  <Row>
+                    <Col>
+                      <Form.Group className="mb-3">
+                        <StyledFormLabel>Country</StyledFormLabel>
+                        <StyledFormControl 
+                          type="text" 
+                          name="country"
+                          value={userData.country} 
+                          onChange={handleInputChange}
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col>
+                      <Form.Group className="mb-3">
+                        <StyledFormLabel>State</StyledFormLabel>
+                        <StyledFormControl 
+                          type="text" 
+                          name="state"
+                          value={userData.state} 
+                          onChange={handleInputChange}
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col>
+                      <Form.Group className="mb-3">
+                        <StyledFormLabel>Phone Number</StyledFormLabel>
+                        <StyledFormControl 
+                          type="text" 
+                          name="phoneNumber"
+                          value={userData.phoneNumber} 
+                          onChange={handleInputChange}
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col>
+                      <Form.Group className="mb-3">
+                        <StyledFormLabel>Postal Code</StyledFormLabel>
+                        <StyledFormControl 
+                          type="text" 
+                          name="postalCode"
+                          value={userData.postalCode} 
+                          onChange={handleInputChange}
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                  <Form.Group className="mb-3">
+                    <StyledCheckbox 
+                      type="checkbox" 
+                      label="Show phone number on my profile" 
+                      checked={userData.showNumberOnProfile}
+                      onChange={() => setUserData({ ...userData, showNumberOnProfile: !userData.showNumberOnProfile })}
+                    />
+                  </Form.Group>
+                
+                  <UpdateButton type="submit" className="mt-3">
                     Update Profile
-                  </Button>
-              
-              </Form>
-            </Card.Body>
-          </Card>
-          {userData.profileCompletionPercentage < 100 && (
-            <Alert variant="info" className="mt-3">
-              Your profile is {userData.profileCompletionPercentage}% complete. Please fill in the missing information to complete your profile.
-            </Alert>
-          )}
-        </Col>
-      </Row>
-      {loading && <Loader />}
-    </StyledContainer>
+                  </UpdateButton>
+                
+                </Form>
+              </Card.Body>
+            </FormSection>
+            {userData.profileCompletionPercentage < 100 && (
+              <Alert 
+                variant="warning" 
+                className="mt-3" 
+                style={{ 
+                  backgroundColor: 'var(--secondary-lighter)', 
+                  color: 'var(--primary-dark)', 
+                  borderColor: 'var(--secondary)'
+                }}
+              >
+                Your profile is {userData.profileCompletionPercentage}% complete. Please fill in the missing information to complete your profile.
+              </Alert>
+            )}
+          </Col>
+        </Row>
+        {loading && <Loader />}
+      </StyledContainer>
+    </PageWrapper>
   );
 };
 

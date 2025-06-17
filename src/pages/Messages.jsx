@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, Paper, Grid, TextField, Button, IconButton, Avatar, Badge } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { styled as muiStyled } from '@mui/material/styles';
+import styled from 'styled-components';
 import SendIcon from '@mui/icons-material/Send';
 import SearchIcon from '@mui/icons-material/Search';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -12,105 +13,207 @@ import DoneAllIcon from '@mui/icons-material/DoneAll';
 import { getUserMessages, sendMessage, markMessageAsRead } from '../contexts/api';
 import { toast } from 'react-toastify';
 
-const MainContainer = styled(Box)({
-  backgroundColor: '#f0f2f5',
-  minHeight: '100vh',
-  padding: '16px',
-  '@media (max-width: 600px)': {
-    padding: '8px'
+const MainContainer = styled(Box)`
+  background: linear-gradient(135deg, #f8f8f8 0%, var(--background-highlight) 100%);
+  min-height: 100vh;
+  padding: 16px;
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at top right, rgba(251, 194, 31, 0.15) 0%, transparent 70%),
+                radial-gradient(circle at bottom left, rgba(192, 49, 21, 0.08) 0%, transparent 70%);
+    z-index: 0;
+    pointer-events: none;
   }
-});
+  
+  @media (max-width: 600px) {
+    padding: 8px;
+  }
+`;
 
-const MessagesContainer = styled(Paper)({
+const ContentWrapper = styled(Box)`
+  position: relative;
+  z-index: 1;
+`;
+
+const MessagesContainer = muiStyled(Paper)(({ theme }) => ({
   display: 'flex',
   height: 'calc(100vh - 100px)',
   overflow: 'hidden',
-  borderRadius: '12px',
+  borderRadius: '15px',
   backgroundColor: '#fff',
-  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-});
+  boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
+  border: '1px solid rgba(251, 194, 31, 0.2)',
+}));
 
-const ConversationsList = styled(Box)({
+const ConversationsList = muiStyled(Box)(({ theme }) => ({
   width: '30%',
-  borderRight: '1px solid #e0e0e0',
+  borderRight: '1px solid rgba(251, 194, 31, 0.2)',
   backgroundColor: '#fff',
   display: 'flex',
   flexDirection: 'column',
-  '@media (max-width: 600px)': {
+  [theme.breakpoints.down('sm')]: {
     width: '100%'
   }
-});
+}));
 
-const ConversationHeader = styled(Box)({
-  padding: '10px 16px',
-  backgroundColor: '#f0f2f5',
-  borderBottom: '1px solid #e0e0e0'
-});
+const ConversationHeader = muiStyled(Box)(({ theme }) => ({
+  padding: '15px 16px',
+  background: 'linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%)',
+  borderBottom: '1px solid rgba(251, 194, 31, 0.2)',
+}));
 
-const ConversationItem = styled(Box)(({ selected }) => ({
-  padding: '12px 16px',
+const ConversationItem = muiStyled(Box, {
+  shouldForwardProp: (prop) => prop !== 'selected',
+})(({ selected, theme }) => ({
+  padding: '15px 16px',
   cursor: 'pointer',
   display: 'flex',
   alignItems: 'center',
-  backgroundColor: selected ? '#f0f2f5' : '#fff',
+  backgroundColor: selected ? 'rgba(251, 194, 31, 0.1)' : '#fff',
+  transition: 'all 0.3s ease',
   '&:hover': {
-    backgroundColor: '#f5f6f6'
+    backgroundColor: 'rgba(251, 194, 31, 0.05)'
   },
-  borderBottom: '1px solid #e0e0e0'
+  borderBottom: '1px solid rgba(251, 194, 31, 0.2)'
 }));
 
-const ChatArea = styled(Box)({
+const ChatArea = muiStyled(Box)(({ theme }) => ({
   flexGrow: 1,
   display: 'flex',
   flexDirection: 'column',
-  backgroundColor: '#efeae2',
+  backgroundColor: '#f5f5f5',
   backgroundImage: 'url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png")',
-  backgroundSize: 'contain'
-});
+  backgroundSize: 'contain',
+  position: 'relative',
+  
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    zIndex: 0
+  }
+}));
 
-const ChatHeader = styled(Box)({
-  padding: '10px 16px',
-  backgroundColor: '#f0f2f5',
-  borderBottom: '1px solid #e0e0e0',
+const ChatHeader = muiStyled(Box)(({ theme }) => ({
+  padding: '15px 20px',
+  background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
+  color: '#ffffff',
+  borderBottom: '1px solid rgba(251, 194, 31, 0.2)',
   display: 'flex',
-  alignItems: 'center'
-});
+  alignItems: 'center',
+  position: 'relative',
+  zIndex: 1
+}));
 
-const MessagesArea = styled(Box)({
+const MessagesArea = muiStyled(Box)(({ theme }) => ({
   flexGrow: 1,
   padding: '20px',
   overflowY: 'auto',
   display: 'flex',
   flexDirection: 'column',
-  gap: '8px'
-});
-
-const MessageBubble = styled(Box)(({ sent }) => ({
-  maxWidth: '65%',
-  padding: '8px 12px',
-  borderRadius: sent ? '8px 0 8px 8px' : '0 8px 8px 8px',
-  alignSelf: sent ? 'flex-end' : 'flex-start',
-  backgroundColor: sent ? '#e7ffdb' : '#fff',
-  boxShadow: '0 1px 1px rgba(0,0,0,0.1)',
+  gap: '10px',
   position: 'relative',
-  marginBottom: '4px'
+  zIndex: 1
 }));
 
-const InputArea = styled(Box)({
+const MessageBubble = muiStyled(Box, {
+  shouldForwardProp: (prop) => prop !== 'sent',
+})(({ sent, theme }) => ({
+  maxWidth: '65%',
   padding: '12px 16px',
-  backgroundColor: '#f0f2f5',
-  borderTop: '1px solid #e0e0e0'
-});
+  borderRadius: sent ? '15px 0 15px 15px' : '0 15px 15px 15px',
+  alignSelf: sent ? 'flex-end' : 'flex-start',
+  backgroundColor: sent ? 'rgba(192, 49, 21, 0.1)' : '#fff',
+  boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
+  position: 'relative',
+  marginBottom: '4px',
+  border: sent ? '1px solid rgba(192, 49, 21, 0.2)' : '1px solid rgba(251, 194, 31, 0.2)'
+}));
 
-const SearchField = styled(TextField)({
+const InputArea = muiStyled(Box)(({ theme }) => ({
+  padding: '15px 20px',
+  background: 'linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%)',
+  borderTop: '1px solid rgba(251, 194, 31, 0.2)',
+  position: 'relative',
+  zIndex: 1
+}));
+
+const SearchField = muiStyled(TextField)(({ theme }) => ({
   '& .MuiOutlinedInput-root': {
-    backgroundColor: '#f0f2f5',
+    backgroundColor: '#fff',
     borderRadius: '8px',
     '& fieldset': {
-      border: 'none'
+      border: '1px solid rgba(192, 49, 21, 0.2)',
+    },
+    '&:hover fieldset': {
+      borderColor: 'var(--primary)'
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: 'var(--primary)',
+      borderWidth: '1px'
     }
   }
-});
+}));
+
+const SendButton = muiStyled(Button)(({ theme }) => ({
+  background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
+  color: '#fff',
+  height: '100%',
+  minWidth: '50px',
+  borderRadius: '8px',
+  '&:hover': {
+    background: 'linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%)',
+    transform: 'translateY(-2px)',
+    boxShadow: '0 4px 8px rgba(192, 49, 21, 0.3)'
+  },
+  '&.Mui-disabled': {
+    background: '#e0e0e0',
+    color: '#a0a0a0'
+  }
+}));
+
+const MessageInput = muiStyled(TextField)(({ theme }) => ({
+  '& .MuiOutlinedInput-root': {
+    backgroundColor: '#fff',
+    borderRadius: '8px',
+    '& fieldset': {
+      border: '1px solid rgba(192, 49, 21, 0.2)',
+    },
+    '&:hover fieldset': {
+      borderColor: 'var(--primary)'
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: 'var(--primary)',
+      borderWidth: '1px'
+    }
+  }
+}));
+
+const StyledBadge = muiStyled(Badge)(({ theme }) => ({
+  '& .MuiBadge-badge': {
+    backgroundColor: 'var(--primary)',
+    color: '#fff',
+    fontWeight: 'bold'
+  }
+}));
+
+const StyledAvatar = muiStyled(Avatar)(({ theme }) => ({
+  width: 48,
+  height: 48,
+  border: '2px solid #fff',
+  boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+}));
 
 const Messages = () => {
   const [conversations, setConversations] = useState([]);
@@ -257,174 +360,205 @@ const Messages = () => {
 
   return (
     <MainContainer>
-      <MessagesContainer elevation={0}>
-        <ConversationsList>
-          <ConversationHeader>
-            <SearchField
-              fullWidth
-              size="small"
-              placeholder="Search or start new chat"
-              InputProps={{
-                startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />
-              }}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </ConversationHeader>
+      <ContentWrapper>
+        <MessagesContainer elevation={0}>
+          <ConversationsList>
+            <ConversationHeader>
+              <SearchField
+                fullWidth
+                size="small"
+                placeholder="Search conversations"
+                InputProps={{
+                  startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />
+                }}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </ConversationHeader>
 
-          {conversations
-            .filter(conv => 
-              conv.participants.some(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-              conv.advert.title.toLowerCase().includes(searchTerm.toLowerCase())
-            )
-            .map(conversation => (
-              <ConversationItem
-                key={conversation._id}
-                selected={selectedConversation?._id === conversation._id}
-                onClick={() => handleConversationSelect(conversation)}
-              >
-                <Badge 
-                  badgeContent={conversation.unreadCount} 
-                  color="primary"
-                  sx={{ mr: 2 }}
+            {conversations
+              .filter(conv => 
+                conv.participants.some(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                conv.advert.title.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+              .map(conversation => (
+                <ConversationItem
+                  key={conversation._id}
+                  selected={selectedConversation?._id === conversation._id}
+                  onClick={() => handleConversationSelect(conversation)}
                 >
-                  <Avatar 
-                    src={`https://i.pravatar.cc/150?u=${conversation.participants[0]._id}`}
-                    sx={{ width: 48, height: 48 }}
-                  />
-                </Badge>
-                <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                  <Typography variant="subtitle1" noWrap>
-                    {conversation.participants.map(p => p.name).join(', ')}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary" noWrap>
-                    {conversation.advert.title}
-                  </Typography>
-                </Box>
-              </ConversationItem>
-            ))}
-        </ConversationsList>
-
-        <ChatArea>
-          {selectedConversation ? (
-            <>
-              <ChatHeader>
-                <Avatar 
-                  src={`https://i.pravatar.cc/150?u=${selectedConversation.participants[0]._id}`}
-                  sx={{ width: 40, height: 40, mr: 2 }}
-                />
-                <Box>
-                  <Typography variant="subtitle1">
-                    {selectedConversation.participants.map(p => p.name).join(', ')}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    {selectedConversation.advert.title}
-                  </Typography>
-                </Box>
-              </ChatHeader>
-
-              <MessagesArea ref={messagesAreaRef}>
-                {messages.map((message) => (
-                  <MessageBubble
-                    key={message._id}
-                    sent={message.sender._id === currentUser._id}
+                  <StyledBadge 
+                    badgeContent={conversation.unreadCount} 
+                    color="primary"
+                    sx={{ mr: 2 }}
                   >
-                    <Typography variant="body1">{message.content}</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', mt: 0.5 }}>
-                      <Typography variant="caption" color="textSecondary" sx={{ mr: 0.5 }}>
-                        {getMessageTime(message.createdAt)}
-                      </Typography>
-                      {message.sender._id === currentUser._id && (
-                        <DoneAllIcon sx={{ fontSize: 16, color: message.read ? '#53bdeb' : '#667781' }} />
-                      )}
-                    </Box>
-                    <IconButton
-                      size="small"
-                      onClick={(e) => handleMessageOptions(e, message)}
-                      sx={{ 
-                        position: 'absolute', 
-                        right: 0, 
-                        top: 0,
-                        opacity: 0,
-                        '&:hover': { opacity: 1 }
-                      }}
-                    >
-                      <MoreVertIcon fontSize="small" />
-                    </IconButton>
-                  </MessageBubble>
-                ))}
-                <div ref={messagesEndRef} />
-              </MessagesArea>
-
-              <InputArea>
-                <form onSubmit={handleSendMessage}>
-                  <Grid container spacing={2}>
-                    <Grid item xs>
-                      <TextField
-                        fullWidth
-                        multiline
-                        maxRows={4}
-                        placeholder="Type a message"
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        variant="outlined"
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
-                            backgroundColor: '#fff',
-                            borderRadius: '8px',
-                          }
-                        }}
-                      />
-                    </Grid>
-                    <Grid item>
-                      <Button
-                        type="submit"
-                        variant="contained"
-                        disabled={!newMessage.trim()}
+                    <StyledAvatar 
+                      src={`https://i.pravatar.cc/150?u=${conversation.participants[0]._id}`}
+                    />
+                  </StyledBadge>
+                  <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'var(--primary-dark)' }} noWrap>
+                      {conversation.participants.map(p => p.name).join(', ')}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" noWrap>
+                      {conversation.advert.title}
+                    </Typography>
+                    {conversation.lastMessage && (
+                      <Typography 
+                        variant="caption" 
+                        color="textSecondary"
                         sx={{ 
-                          backgroundColor: '#0a6638',
-                          height: '100%',
-                          minWidth: '50px',
-                          '&:hover': {
-                            backgroundColor: '#0a6638'
-                          }
+                          display: 'block',
+                          fontWeight: conversation.unreadCount > 0 ? 600 : 400
                         }}
                       >
-                        <SendIcon />
-                      </Button>
-                    </Grid>
-                  </Grid>
-                </form>
-              </InputArea>
-            </>
-          ) : (
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              height="100%"
-              sx={{ backgroundColor: '#f0f2f5' }}
-            >
-              <Typography variant="h6" color="textSecondary">
-                Select a conversation to start messaging
-              </Typography>
-            </Box>
-          )}
-        </ChatArea>
-      </MessagesContainer>
+                        {conversation.lastMessage.content.substring(0, 25)}
+                        {conversation.lastMessage.content.length > 25 ? '...' : ''}
+                      </Typography>
+                    )}
+                  </Box>
+                  {conversation.lastMessage && (
+                    <Typography 
+                      variant="caption" 
+                      color="textSecondary" 
+                      sx={{ ml: 1, fontSize: '0.7rem' }}
+                    >
+                      {new Date(conversation.lastMessage.createdAt).toLocaleDateString()}
+                    </Typography>
+                  )}
+                </ConversationItem>
+              ))}
+          </ConversationsList>
 
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleCloseMenu}
-      >
-        <MenuItem onClick={handleCopyMessage}>
-          <ContentCopyIcon fontSize="small" sx={{ mr: 1 }} /> Copy
-        </MenuItem>
-        <MenuItem onClick={handleReplyMessage}>
-          <ReplyIcon fontSize="small" sx={{ mr: 1 }} /> Reply
-        </MenuItem>
-      </Menu>
+          <ChatArea>
+            {selectedConversation ? (
+              <>
+                <ChatHeader>
+                  <StyledAvatar 
+                    src={`https://i.pravatar.cc/150?u=${selectedConversation.participants[0]._id}`}
+                    sx={{ width: 40, height: 40, mr: 2 }}
+                  />
+                  <Box>
+                    <Typography variant="subtitle1" sx={{ color: '#fff', fontWeight: 600 }}>
+                      {selectedConversation.participants.map(p => p.name).join(', ')}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
+                      {selectedConversation.advert.title}
+                    </Typography>
+                  </Box>
+                </ChatHeader>
+
+                <MessagesArea ref={messagesAreaRef}>
+                  {messages.map((message) => (
+                    <MessageBubble
+                      key={message._id}
+                      sent={message.sender._id === currentUser._id}
+                    >
+                      <Typography variant="body1" sx={{ color: 'var(--text-dark)' }}>{message.content}</Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', mt: 0.5 }}>
+                        <Typography variant="caption" color="textSecondary" sx={{ mr: 0.5, fontSize: '0.7rem' }}>
+                          {getMessageTime(message.createdAt)}
+                        </Typography>
+                        {message.sender._id === currentUser._id && (
+                          <DoneAllIcon sx={{ fontSize: 16, color: message.read ? 'var(--primary)' : '#667781' }} />
+                        )}
+                      </Box>
+                      <IconButton
+                        size="small"
+                        onClick={(e) => handleMessageOptions(e, message)}
+                        sx={{ 
+                          position: 'absolute', 
+                          right: 0, 
+                          top: 0,
+                          opacity: 0,
+                          '&:hover': { opacity: 1 },
+                          color: 'var(--primary)'
+                        }}
+                      >
+                        <MoreVertIcon fontSize="small" />
+                      </IconButton>
+                    </MessageBubble>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </MessagesArea>
+
+                <InputArea>
+                  <form onSubmit={handleSendMessage}>
+                    <Grid container spacing={2}>
+                      <Grid item xs>
+                        <MessageInput
+                          fullWidth
+                          multiline
+                          maxRows={4}
+                          placeholder="Type a message"
+                          value={newMessage}
+                          onChange={(e) => setNewMessage(e.target.value)}
+                          variant="outlined"
+                        />
+                      </Grid>
+                      <Grid item>
+                        <SendButton
+                          type="submit"
+                          variant="contained"
+                          disabled={!newMessage.trim()}
+                        >
+                          <SendIcon />
+                        </SendButton>
+                      </Grid>
+                    </Grid>
+                  </form>
+                </InputArea>
+              </>
+            ) : (
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                height="100%"
+                sx={{ backgroundColor: 'rgba(248, 248, 248, 0.8)', position: 'relative', zIndex: 1 }}
+              >
+                <Box textAlign="center">
+                  <Avatar 
+                    sx={{ 
+                      width: 80, 
+                      height: 80, 
+                      margin: '0 auto 16px',
+                      backgroundColor: 'var(--primary-light)'
+                    }}
+                  >
+                    <SendIcon sx={{ fontSize: 40, color: '#fff' }} />
+                  </Avatar>
+                  <Typography variant="h6" color="var(--primary-dark)" fontWeight={600}>
+                    Your Messages
+                  </Typography>
+                  <Typography variant="body1" color="textSecondary" sx={{ mt: 1 }}>
+                    Select a conversation to start messaging
+                  </Typography>
+                </Box>
+              </Box>
+            )}
+          </ChatArea>
+        </MessagesContainer>
+
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleCloseMenu}
+          PaperProps={{
+            sx: {
+              borderRadius: '8px',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+            }
+          }}
+        >
+          <MenuItem onClick={handleCopyMessage} sx={{ color: 'var(--primary-dark)' }}>
+            <ContentCopyIcon fontSize="small" sx={{ mr: 1, color: 'var(--primary)' }} /> Copy
+          </MenuItem>
+          <MenuItem onClick={handleReplyMessage} sx={{ color: 'var(--primary-dark)' }}>
+            <ReplyIcon fontSize="small" sx={{ mr: 1, color: 'var(--primary)' }} /> Reply
+          </MenuItem>
+        </Menu>
+      </ContentWrapper>
     </MainContainer>
   );
 };

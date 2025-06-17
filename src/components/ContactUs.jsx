@@ -180,7 +180,7 @@ const ContactUs = ({ isDarkMode }) => {
             transition={{ duration: 0.5 }}
           >
             <h1>Contact Us</h1>
-            <p>Have questions about Pets4Home? We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
+            <p>Have questions about PETXMAFIA? We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
           </motion.div>
         </Container>
       </HeaderSection>
@@ -205,7 +205,7 @@ const ContactUs = ({ isDarkMode }) => {
             <ContactCard isDarkMode={isDarkMode}>
               <FaEnvelope className="icon" />
               <h3>Email Us</h3>
-              <p>support@pets4home.com<br />info@pets4home.com</p>
+              <p>support@petxmafia.com<br />info@petxmafia.com</p>
             </ContactCard>
           </Col>
           <Col md={3}>

@@ -28,9 +28,9 @@ const StyledOTP = styled.div`
     text-align: center;
 
     &:focus {
-      border-color: #0a6638;
+      border-color: var(--primary);
       outline: none;
-      box-shadow: 0 0 0 0.2rem rgba(10,102,56,0.25);
+      box-shadow: 0 0 0 0.2rem rgba(192, 49, 21, 0.25);
     }
   }
 `;
@@ -52,16 +52,16 @@ const OTPSubtext = styled.p`
 
 const PasteButton = styled(Button)`
   background: transparent;
-  border: 1px solid #0a6638;
-  color: #ffffff;
+  border: 1px solid var(--primary);
+  color: var(--primary);
   margin-bottom: 1.5rem;
   padding: 0.5rem 1.5rem;
   border-radius: 8px;
   
   &:hover {
-    background: rgba(10,102,56,0.1);
-    border-color: #0a6638;
-    color: #ffffff;
+    background: rgba(192, 49, 21, 0.1);
+    border-color: var(--primary);
+    color: var(--primary-dark);
   }
 `;
 
@@ -93,7 +93,7 @@ const AuthForm = styled(Form)`
 `;
 
 const StyledButton = styled(Button)`
- background: #0a6638;
+ background: var(--primary);
  border: none;
  padding: 0.8rem;
  font-weight: 500;
@@ -101,7 +101,7 @@ const StyledButton = styled(Button)`
  transition: all 0.3s ease;
 
  &:hover {
-   background: #084a29;
+   background: var(--primary-dark);
    transform: translateY(-2px);
  }
 
@@ -114,7 +114,7 @@ const SocialLoginButton = styled(Button)`
  width: 100%;
  background: ${props => props.isDarkMode ? 'rgba(255,255,255,0.1)' : '#f8f9fa'};
  border: 1px solid ${props => props.isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'};
- color:#ffffff;
+ color: ${props => props.isDarkMode ? '#fff' : '#333'};
  padding: 0.8rem;
  display: flex;
  align-items: center;
@@ -157,9 +157,9 @@ const AuthOption = styled.div`
 const OptionButton = styled.button`
  flex: 1;
  padding: 0.8rem;
- background: ${props => props.active ? '#0a6638' : 'transparent'};
+ background: ${props => props.active ? 'var(--primary)' : 'transparent'};
  color: ${props => props.active ? '#fff' : props.isDarkMode ? '#fff' : '#333'};
- border: 1px solid ${props => props.active ? '#0a6638' : props.isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'};
+ border: 1px solid ${props => props.active ? 'var(--primary)' : props.isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'};
  border-radius: 10px;
  cursor: pointer;
  transition: all 0.3s ease;
@@ -169,7 +169,7 @@ const OptionButton = styled.button`
  gap: 0.5rem;
 
  &:hover {
-   background: ${props => props.active ? '#084a29' : props.isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'};
+   background: ${props => props.active ? 'var(--primary-dark)' : props.isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'};
  }
 `;
 
@@ -192,7 +192,7 @@ const ImageSection = styled.div`
    left: 0;
    right: 0;
    bottom: 0;
-   background: linear-gradient(to bottom, rgba(10,102,56,0.2), rgba(10,102,56,0.8));
+   background: linear-gradient(to bottom, rgba(192, 49, 21, 0.2), rgba(136, 28, 4, 0.8));
  }
 `;
 

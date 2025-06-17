@@ -57,10 +57,10 @@ const TermsAndConditions = ({ isDarkMode }) => {
           <LastUpdated isDarkMode={isDarkMode}>Last updated: January 31, 2025</LastUpdated>
 
           <SectionTitle>1. Introduction</SectionTitle>
-          <p>Welcome to Pets4Home. By using our website and services, you agree to be bound by these Terms and Conditions. Please read them carefully before using our platform.</p>
+          <p>Welcome to PETXMAFIA. By using our website and services, you agree to be bound by these Terms and Conditions. Please read them carefully before using our platform.</p>
 
           <SectionTitle>2. Definitions</SectionTitle>
-          <p>"Platform" refers to the Pets4Home website and all related services.</p>
+          <p>"Platform" refers to the PETXMAFIA website and all related services.</p>
           <p>"User" refers to any person who accesses or uses the Platform.</p>
           <p>"Content" refers to any information, text, graphics, or other materials uploaded to the Platform.</p>
 
@@ -98,7 +98,7 @@ const TermsAndConditions = ({ isDarkMode }) => {
           </ul>
 
           <SectionTitle>8. Liability</SectionTitle>
-          <p>Pets4Home is not liable for:</p>
+          <p>PETXMAFIA is not liable for:</p>
           <ul>
             <li>Actions of users on the platform</li>
             <li>Quality or health of pets listed</li>

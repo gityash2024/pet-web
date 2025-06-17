@@ -1,8 +1,8 @@
-# Pets4Home Web Application
+# PETXMAFIA Web Application
 
 ## Overview
 
-Pets4Home is a user-friendly marketplace for buying and selling pets and pet accessories. This React-based web application, built with Vite, provides a seamless experience for users to browse, search, and interact with pet-related listings.
+PETXMAFIA is a user-friendly marketplace for buying and selling pets and pet accessories. This React-based web application, built with Vite, provides a seamless experience for users to browse, search, and interact with pet-related listings.
 
 ## Table of Contents
 
@@ -40,7 +40,7 @@ Pets4Home is a user-friendly marketplace for buying and selling pets and pet acc
 ## Project Structure
 
 ```
-pets4home-web/
+petxmafia-web/
 ├── public/
 ├── src/
 │   ├── assets/
@@ -77,12 +77,12 @@ pets4home-web/
 
 1. Clone the repository:
    ```
-   git clone https://github.com/pets4home/pets4home-web.git
+   git clone https://github.com/petxmafia/petxmafia-web.git
    ```
 
 2. Navigate to the project directory:
    ```
-   cd pets4home-web
+   cd petxmafia-web
    ```
 
 3. Install dependencies:
@@ -97,7 +97,7 @@ pets4home-web/
 
 ## Usage
 
-After starting the development server, open your browser and navigate to `http://localhost:3000` (or the port specified in your console output) to access the Pets4Home web application.
+After starting the development server, open your browser and navigate to `http://localhost:3000` (or the port specified in your console output) to access the PETXMAFIA web application.
 
 ## Technologies Used
 
@@ -117,4 +117,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-This README provides a comprehensive overview of the Pets4Home web application, including its features, project structure, setup instructions, and more. It's designed to give developers and stakeholders a clear understanding of the project and how to get started with it.
+This README provides a comprehensive overview of the PETXMAFIA web application, including its features, project structure, setup instructions, and more. It's designed to give developers and stakeholders a clear understanding of the project and how to get started with it.

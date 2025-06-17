@@ -3,13 +3,14 @@ import { Link, useNavigate, NavLink } from 'react-router-dom';
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { BsList } from 'react-icons/bs';
 import styled from 'styled-components';
-import logoImage from '../../dog-icon.svg';
+import logoImage from '../assets/logo.jpeg';
 import { getAllCategories } from '../contexts/api';
 
 const StyledNavbar = styled(Navbar)`
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  padding: 0.5rem 0;
+  background: linear-gradient(135deg, #ffffff 0%, var(--background-highlight) 100%);
+  box-shadow: 0 4px 12px rgba(192, 49, 21, 0.1);
+  padding: 0.8rem 0;
+  border-bottom: 1px solid rgba(251, 194, 31, 0.2);
   
   .navbar-brand {
     display: flex;
@@ -17,21 +18,26 @@ const StyledNavbar = styled(Navbar)`
     img {
       height: 40px;
       margin-right: 10px;
+      border-radius: 5px;
     }
+    font-weight: 600;
+    color: var(--primary) !important;
   }
 
   .nav-link {
-    color: #333 !important;
+    color: var(--text-dark) !important;
     font-weight: 500;
     padding: 0.5rem 1rem;
     position: relative;
+    transition: all 0.3s ease;
     
     &:hover {
-      color: #0a6638 !important;
+      color: var(--primary) !important;
+      transform: translateY(-2px);
     }
     
     &.active {
-      color: #0a6638 !important;
+      color: var(--primary) !important;
       
       &::after {
         content: '';
@@ -41,21 +47,25 @@ const StyledNavbar = styled(Navbar)`
         transform: translateX(-50%);
         width: 100%;
         height: 2px;
-        background-color: #0a6638;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+        box-shadow: 0 2px 4px rgba(192, 49, 21, 0.2);
       }
     }
   }
 
   .btn-new-advert {
-    background-color: #0a6638;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: #fff;
     border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
     font-weight: 500;
+    transition: all 0.3s ease;
+    
     &:hover {
-      background-color: #085530;
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(192, 49, 21, 0.3);
     }
   }
   
@@ -67,9 +77,10 @@ const StyledNavbar = styled(Navbar)`
   
   @media (max-width: 991px) {
     .navbar-collapse {
-      background-color: #fff;
+      background: linear-gradient(135deg, #ffffff 0%, var(--background-highlight) 100%);
       padding: 1rem;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(192, 49, 21, 0.1);
+      border-radius: 0 0 10px 10px;
     }
   }
 `;
@@ -78,12 +89,14 @@ const AnimalCategories = styled.div`
   display: flex;
   justify-content: ${props => props.itemCount <= 6 ? 'center' : 'flex-start'};
   gap: 2rem;
-  padding: 1rem 2rem;
-  background-color: #fffacc;
+  padding: 1.2rem 2rem;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   width: 100%;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   
   &::-webkit-scrollbar {
     display: none;
@@ -94,19 +107,27 @@ const AnimalCategories = styled.div`
     flex-direction: column;
     align-items: center;
     text-decoration: none;
-    color: #333;
+    color: var(--secondary-lighter);
     flex: 0 0 auto;
     min-width: 80px;
+    transition: all 0.3s ease;
     
     svg {
       width: 24px;
       height: 24px;
       margin-bottom: 0.5rem;
-      color: #0a6638;
+      color: var(--secondary);
+      transition: all 0.3s ease;
     }
     
     &:hover {
-      color: #0a6638;
+      color: #fff;
+      transform: translateY(-3px);
+      
+      svg {
+        color: var(--secondary-light);
+        transform: scale(1.1);
+      }
     }
   }
   
@@ -117,12 +138,19 @@ const AnimalCategories = styled.div`
 `;
 
 const LoginButton = styled(Button)`
-  background-color: transparent;
-  border: 2px solid #0a6638;
-  color: #ffffff;
+  background: linear-gradient(135deg, transparent 0%, rgba(192, 49, 21, 0.05) 100%);
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  
   &:hover {
-    background-color: #0a6638;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(192, 49, 21, 0.3);
   }
 `;
 
@@ -192,8 +220,8 @@ const Header = ({ handleLoginModal, isLoggedIn, userProfilePic }) => {
       <StyledNavbar expand="lg" fixed="top" expanded={expanded}>
         <Container>
           <Navbar.Brand as={Link} to="/" onClick={() => setExpanded(false)}>
-            <img src={logoImage} alt="Pets4Home" />
-            Pets4Home
+            <img src={logoImage} alt="PETXMAFIA" />
+            PETXMAFIA
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={() => setExpanded(!expanded)}>
             <BsList />

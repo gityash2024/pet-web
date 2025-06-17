@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import { startConversation } from '../contexts/api';
 
 const Spinner = styled.div`
-  border: 2px solid #f3f3f3;
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   border-top: 2px solid #ffffff;
   width: 20px;
@@ -22,41 +22,90 @@ const Spinner = styled.div`
 `;
 
 const StyledAdDetails = styled.div`
-  background-color: #f8f9fa;
-  color: #333;
+  background: linear-gradient(to bottom, var(--background-light), var(--background-highlight));
+  color: var(--text-dark);
   min-height: 100vh;
-  padding: 20px 0;
+  padding: 40px 0;
 `;
 
 const GlassmorphicCard = styled(motion.div)`
-  background: #fff;
+  background: linear-gradient(135deg, var(--background-light) 0%, var(--background-highlight) 100%);
   border-radius: 15px;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  box-shadow: 0 8px 32px 0 rgba(192, 49, 21, 0.15);
   padding: 30px;
   margin-bottom: 30px;
+  border: 1px solid rgba(251, 194, 31, 0.1);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 12px 40px 0 rgba(192, 49, 21, 0.25);
+    transform: translateY(-5px);
+  }
 `;
 
 const StyledBadge = styled(Badge)`
   font-size: 1rem;
   margin-right: 10px;
-  background-color: #0a6638;
+  background-color: var(--primary);
+  padding: 8px 12px;
+  border-radius: 8px;
+`;
+
+const PriceBadge = styled(Badge)`
+  font-size: 1rem;
+  margin-right: 10px;
+  background-color: var(--secondary);
+  color: var(--primary-dark);
+  padding: 8px 12px;
+  border-radius: 8px;
 `;
 
 const StyledButton = styled(Button)`
-  background-color: #0a6638;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   border: none;
+  padding: 12px 20px;
+  transition: all 0.3s ease;
+  
   &:hover {
-    background-color: #084a29;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    transform: translateY(-2px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const BackButton = styled(Button)`
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: rgba(192, 49, 21, 0.1);
+    color: var(--primary-dark);
+    transform: translateX(-5px);
   }
 `;
 
 const ContactInfo = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: rgba(251, 194, 31, 0.1);
+  border-radius: 8px;
+  
   svg {
-    margin-right: 10px;
-    color: #0a6638;
+    margin-right: 15px;
+    color: var(--primary);
+    font-size: 1.2rem;
+  }
+  
+  span {
+    color: var(--primary-dark);
+    font-weight: 500;
   }
 `;
 
@@ -66,6 +115,45 @@ const AdImage = styled.img`
   object-fit: cover;
   border-radius: 15px;
   margin-bottom: 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  border: 3px solid var(--background-light);
+`;
+
+const AdTitle = styled.h1`
+  color: var(--primary);
+  margin-bottom: 15px;
+  font-weight: 600;
+`;
+
+const AdDescription = styled.p`
+  color: var(--text-dark);
+  line-height: 1.8;
+  font-size: 1.1rem;
+  margin-top: 20px;
+  padding: 15px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  border-left: 3px solid var(--primary-light);
+`;
+
+const SectionTitle = styled.h3`
+  color: var(--primary);
+  margin-bottom: 20px;
+  font-weight: 600;
+  border-bottom: 2px solid var(--secondary);
+  padding-bottom: 10px;
+`;
+
+const StyledFormControl = styled(Form.Control)`
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  padding: 12px 15px;
+  margin-bottom: 15px;
+  
+  &:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 0.2rem rgba(215, 118, 32, 0.25);
+  }
 `;
 
 const AdviewDetails = () => {
@@ -165,9 +253,9 @@ const AdviewDetails = () => {
   return (
     <StyledAdDetails>
       <Container>
-        <Button variant="outline-primary" onClick={() => navigate(-1)} className="mb-3">
-          <FaArrowLeft /> Back
-        </Button>
+        <BackButton onClick={() => navigate(-1)} className="mb-4">
+          <FaArrowLeft className="me-2" /> Back
+        </BackButton>
         <Row>
           <Col lg={8}>
             <GlassmorphicCard
@@ -176,16 +264,16 @@ const AdviewDetails = () => {
               transition={{ duration: 0.5 }}
             >
               <AdImage src={ad.images[0]} alt={ad.name} />
-              <h1>{ad.name}</h1>
+              <AdTitle>{ad.name}</AdTitle>
               <div className="mb-3">
                 <StyledBadge>{ad.category}</StyledBadge>
-                <StyledBadge>₹{ad.price}</StyledBadge>
+                <PriceBadge>₹{ad.price}</PriceBadge>
               </div>
               <ContactInfo>
                 <FaMapMarkerAlt />
                 <span>{ad.location}</span>
               </ContactInfo>
-              <p>{ad.description}</p>
+              <AdDescription>{ad.description}</AdDescription>
             </GlassmorphicCard>
           </Col>
           <Col lg={4}>
@@ -194,7 +282,7 @@ const AdviewDetails = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <h3>Contact Information</h3>
+              <SectionTitle>Contact Information</SectionTitle>
               <ContactInfo>
                 <FaHeart />
                 <span>Age: {ad.age} years</span>
@@ -209,10 +297,10 @@ const AdviewDetails = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
             >
-              <h3>Interested?</h3>
+              <SectionTitle>Interested?</SectionTitle>
               <Form onSubmit={handleFormSubmit}>
                 <Form.Group className="mb-3">
-                  <Form.Control 
+                  <StyledFormControl 
                     type="text" 
                     placeholder="Your Name" 
                     name="name"
@@ -222,7 +310,7 @@ const AdviewDetails = () => {
                   />
                 </Form.Group>
                 <Form.Group className="mb-3">
-                  <Form.Control 
+                  <StyledFormControl 
                     type="email" 
                     placeholder="Your Email" 
                     name="email"
@@ -232,7 +320,7 @@ const AdviewDetails = () => {
                   />
                 </Form.Group>
                 <Form.Group className="mb-3">
-                  <Form.Control 
+                  <StyledFormControl 
                     as="textarea" 
                     rows={3} 
                     placeholder="Your Message" 

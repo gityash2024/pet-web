@@ -14,6 +14,8 @@ import KnowledgeDetails from './pages/KnowledgeHubDetails';
 import { AuthProvider } from './contexts/AuthContext';
 import LoginModal from './components/LoginModal';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
+import { theme, injectBootstrapOverrides } from './theme';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import './style.css';
@@ -75,20 +77,27 @@ function AppRoutes() {
 }
 
 function App() {
+  useEffect(() => {
+    // Inject Bootstrap custom styles
+    injectBootstrapOverrides();
+  }, []);
+
   return (
     <GoogleOAuthProvider clientId="426866646203-359sdhcmpq08648kfvfravrf9g7spar8.apps.googleusercontent.com">
-      <ThemeProvider
-        breakpoints={['xxxl', 'xxl', 'xl', 'lg', 'md', 'sm', 'xs', 'xxs']}
-        minBreakpoint="xxs"
-      >
-        <div className="app">
-          <AuthProvider>
-            <Router>
-              <AppRoutes />
-            </Router>
-          </AuthProvider>
-        </div>
-      </ThemeProvider>
+      <MuiThemeProvider theme={theme}>
+        <ThemeProvider
+          breakpoints={['xxxl', 'xxl', 'xl', 'lg', 'md', 'sm', 'xs', 'xxs']}
+          minBreakpoint="xxs"
+        >
+          <div className="app">
+            <AuthProvider>
+              <Router>
+                <AppRoutes />
+              </Router>
+            </AuthProvider>
+          </div>
+        </ThemeProvider>
+      </MuiThemeProvider>
     </GoogleOAuthProvider>
   );
 }

@@ -7,10 +7,10 @@ const ScrollButton = styled(motion.button)`
   position: fixed;
   bottom: 30px;
   right: 30px;
-  width: 45px;
-  height: 45px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background-color: #0a6638;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: #fff;
   border: none;
   cursor: pointer;
@@ -18,26 +18,41 @@ const ScrollButton = styled(motion.button)`
   align-items: center;
   justify-content: center;
   z-index: 99999;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 15px rgba(192, 49, 21, 0.3);
   transition: all 0.3s ease;
   opacity: ${props => props.visible ? 1 : 0};
   pointer-events: ${props => props.visible ? 'auto' : 'none'};
+  border: 2px solid rgba(255, 255, 255, 0.2);
 
   &:hover {
-    background-color: #085530;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
     transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(192, 49, 21, 0.4);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
   }
 
   svg {
     width: 20px;
     height: 20px;
+    stroke-width: 2.5;
   }
 
   @media (max-width: 768px) {
     bottom: 20px;
     right: 20px;
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
   }
 `;
 

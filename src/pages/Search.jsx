@@ -11,26 +11,28 @@ import profileImage from '../assets/profile.png';
 const StyledSearch = styled.div`
   min-height: 100vh;
   padding: 20px 0;
-  background-color: #f8f9fa;
+  background: linear-gradient(to bottom, var(--background-light), var(--background-highlight));
 `;
 
 const SearchSection = styled.div`
-  background-color: #fff;
+  background: linear-gradient(135deg, var(--background-light) 0%, var(--background-highlight) 100%);
   padding: 30px;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border: 1px solid rgba(251, 194, 31, 0.1);
 `;
 
 const FilterSection = styled.div`
-  background-color: #fff;
+  background: linear-gradient(135deg, var(--background-light) 0%, var(--background-highlight) 100%);
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   margin-bottom: 20px;
+  border: 1px solid rgba(251, 194, 31, 0.1);
 `;
 
 const PetCard = styled(motion.div)` 
-  background: #fff;
+  background: linear-gradient(135deg, var(--background-light) 0%, var(--background-highlight) 100%);
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -39,6 +41,14 @@ const PetCard = styled(motion.div)`
   height: 450px;
   display: flex;
   flex-direction: column;
+  border: 1px solid rgba(251, 194, 31, 0.1);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(192, 49, 21, 0.15);
+    border: 1px solid var(--secondary);
+  }
 
   img {
     width: 100%;
@@ -61,8 +71,8 @@ const PetCard = styled(motion.div)`
 
 const Badge = styled.span`
   display: inline-block;
-  background-color: ${props => props.type === 'verified' ? '#0a6638' : '#fffacc'};
-  color: ${props => props.type === 'verified' ? '#fff' : '#0a6638'};
+  background-color: ${props => props.type === 'verified' ? 'var(--primary)' : 'var(--secondary)'};
+  color: ${props => props.type === 'verified' ? '#fff' : 'var(--primary-dark)'};
   font-size: 12px;
   padding: 3px 8px;
   border-radius: 5px;
@@ -77,12 +87,13 @@ const BadgeContainer = styled.div`
 `;
 
 const SkeletonCard = styled(motion.div)`
-  background: #fff;
+  background: linear-gradient(135deg, var(--background-light) 0%, var(--background-highlight) 100%);
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   height: 450px;
   margin-bottom: 20px;
+  border: 1px solid rgba(251, 194, 31, 0.1);
   
   .skeleton-img {
     width: 100%;
@@ -104,17 +115,59 @@ const PaginationContainer = styled.div`
   .pagination {
     .page-item {
       .page-link {
-        color: #0a6638;
+        color: var(--primary);
         &:focus {
           box-shadow: none;
         }
       }
       &.active .page-link {
-        background-color: #0a6638;
-        border-color: #0a6638;
+        background-color: var(--primary);
+        border-color: var(--primary);
         color: #fff;
       }
     }
+  }
+`;
+
+const TabButton = styled(Button)`
+  background-color: ${props => props.active ? 'var(--primary)' : 'transparent'};
+  color: ${props => props.active ? '#fff' : 'var(--primary)'};
+  border: 1px solid var(--primary);
+  margin-right: 10px;
+  margin-bottom: 10px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: ${props => props.active ? 'var(--primary-dark)' : 'rgba(192, 49, 21, 0.1)'};
+    color: ${props => props.active ? '#fff' : 'var(--primary-dark)'};
+  }
+`;
+
+const SearchInput = styled(Form.Control)`
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  padding: 10px 15px;
+  
+  &:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 0.2rem rgba(215, 118, 32, 0.25);
+  }
+`;
+
+const FilterLabel = styled(Form.Label)`
+  color: var(--primary);
+  font-weight: 500;
+`;
+
+const ViewButton = styled(Button)`
+  background-color: var(--primary);
+  border: none;
+  width: 100%;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
   }
 `;
 
@@ -233,7 +286,7 @@ const Search = () => {
         <Row>
           <Col lg={3}>
             <FilterSection>
-              <h4>Filter</h4>
+              <h4 style={{ color: 'var(--primary)', marginBottom: '20px' }}>Filter</h4>
               <div className="mb-3">
                 <Form.Check
                   type="radio"
@@ -271,7 +324,7 @@ const Search = () => {
 
               {(activeTab === 'pets' || activeTab === 'all') && (
                 <Form.Group className="mb-3">
-                  <Form.Label>Category</Form.Label>
+                  <FilterLabel>Category</FilterLabel>
                   <Form.Select name="category" value={filters.category} onChange={handleFilterChange}>
                     <option value="">All Categories</option>
                     {categories.map((category) => (
@@ -284,10 +337,10 @@ const Search = () => {
               )}
 
               <Form.Group className="mb-3">
-                <Form.Label>Price Range</Form.Label>
+                <FilterLabel>Price Range</FilterLabel>
                 <Row>
                   <Col>
-                    <Form.Control 
+                    <SearchInput 
                       type="number" 
                       placeholder="Min" 
                       name="minPrice" 
@@ -296,7 +349,7 @@ const Search = () => {
                     />
                   </Col>
                   <Col>
-                    <Form.Control 
+                    <SearchInput 
                       type="number" 
                       placeholder="Max" 
                       name="maxPrice" 
@@ -314,7 +367,7 @@ const Search = () => {
               <Form onSubmit={handleSearchSubmit}>
                 <Row className="align-items-center">
                   <Col sm={9}>
-                    <Form.Control 
+                    <SearchInput 
                       type="text"
                       placeholder="Search for pets, accessories..."
                       value={searchTerm}
@@ -328,7 +381,7 @@ const Search = () => {
                     <Button 
                       type="submit" 
                       className="w-100" 
-                      style={{ backgroundColor: '#0a6638', borderColor: '#0a6638' }}
+                      style={{ backgroundColor: 'var(--primary)', borderColor: 'var(--primary)' }}
                     >
                       <FaSearch className="me-2" />
                       Search
@@ -338,11 +391,43 @@ const Search = () => {
               </Form>
             </SearchSection>
 
-            <h2 className="my-4">
+            <h2 className="my-4" style={{ color: 'var(--primary)' }}>
               {activeTab === 'pets' ? 'Pet Breeds' : 
                activeTab === 'accessories' ? 'Pet Accessories' : 
                'All Items'}
             </h2>
+
+            <div className="mb-4">
+              <TabButton 
+                active={activeTab === 'all'} 
+                onClick={() => {
+                  setActiveTab('all');
+                  setCurrentPage(1);
+                  setFilters(prev => ({ ...prev, category: '' }));
+                }}
+              >
+                All
+              </TabButton>
+              <TabButton 
+                active={activeTab === 'pets'} 
+                onClick={() => {
+                  setActiveTab('pets');
+                  setCurrentPage(1);
+                }}
+              >
+                Pets
+              </TabButton>
+              <TabButton 
+                active={activeTab === 'accessories'} 
+                onClick={() => {
+                  setActiveTab('accessories');
+                  setCurrentPage(1);
+                  setFilters(prev => ({ ...prev, category: '' }));
+                }}
+              >
+                Accessories
+              </TabButton>
+            </div>
 
             <Row>
               {loading ? (
@@ -366,11 +451,11 @@ const Search = () => {
                       <img src={item.images?.[0] || profileImage} alt={item.name} />
                       <div className="content">
                         <div className="d-flex align-items-center mb-2">
-                          <h4>{item.name}</h4>
+                          <h4 style={{ color: 'var(--primary-dark)' }}>{item.name}</h4>
                           {'breed' in item && <Badge type="verified">VERIFIED</Badge>}
                         </div>
                         <div className="mb-2">
-                          <strong>₹ {item.price}</strong>
+                          <strong style={{ color: 'var(--primary)' }}>₹ {item.price}</strong>
                         </div>
                         <BadgeContainer>
                          { 'category' in item && <Badge type="label">Type: {item.category}</Badge>}
@@ -378,21 +463,16 @@ const Search = () => {
                         </BadgeContainer>
                       </div>
                       <div className="button-container">
-                        <Button 
-                          variant="outline-success"
-                          onClick={() => handleViewDetails(item)}
-                          className="w-100"
-                          style={{ borderColor: '#0a6638', color: '#0a6638' }}
-                        >
+                        <ViewButton onClick={() => handleViewDetails(item)}>
                           View Details
-                        </Button>
+                        </ViewButton>
                       </div>
                     </PetCard>
                   </Col>
                 ))
               ) : (
                 <Col>
-                  <p className="text-center">No items found</p>
+                  <p className="text-center" style={{ color: 'var(--primary)' }}>No items found</p>
                 </Col>
               )}
             </Row>

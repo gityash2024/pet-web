@@ -1,0 +1,38 @@
+:root {
+  /* Primary Colors */
+  --primary: #c03115;
+  --primary-dark: #881c04;
+  --primary-light: #d77620;
+  
+  /* Secondary Colors */
+  --secondary: #fbc21f;
+  --secondary-light: #fbca48;
+  --secondary-lighter: #fbc960;
+  
+  /* Accent Colors */
+  --accent: #f29b37;
+  --accent-dark: #a46404;
+  --accent-light: #fbdc30;
+  
+  /* Additional Color */
+  --highlight: #dcb60d;
+  
+  /* UI Colors */
+  --text-dark: #333333;
+  --text-light: #ffffff;
+  --background-light: #ffffff;
+  --background-highlight: #fbf8e6;
+  --border-color: #e0e0e0;
+  
+  /* Functional Colors */
+  --success: #28a745;
+  --danger: #dc3545;
+  --warning: #fbc21f;
+  --info: #17a2b8;
+  
+  /* Gradient Definitions */
+  --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  --gradient-secondary: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-light) 100%);
+  --gradient-background: linear-gradient(135deg, var(--background-light) 0%, var(--background-highlight) 100%);
+  --gradient-highlight: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+} 

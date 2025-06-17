@@ -9,7 +9,7 @@ const Container = styled.div`
  min-height: 100vh;
  overflow: hidden;
  text-align: center;
- background: linear-gradient(135deg, #0a6638 0%, #084a29 100%);
+ background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
  display: flex;
  justify-content: center;
  align-items: center;
@@ -19,9 +19,14 @@ const Container = styled.div`
 const ErrorContent = styled.div`
  width: 90%;
  max-width: 600px;
- padding: 2rem;
+ padding: 2.5rem;
  position: relative;
  z-index: 2;
+ background: rgba(255, 255, 255, 0.1);
+ backdrop-filter: blur(10px);
+ border-radius: 20px;
+ border: 1px solid rgba(255, 255, 255, 0.2);
+ box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
 
  h1 {
    font-size: clamp(100px, 15vw, 180px);
@@ -32,25 +37,39 @@ const ErrorContent = styled.div`
    transition: all 0.5s ease;
    position: relative;
    line-height: 1;
-   text-shadow: 2px 2px 0px #084a29;
+   text-shadow: 3px 3px 0px var(--primary-dark);
+   font-weight: 800;
+   
+   &::after {
+     content: '';
+     position: absolute;
+     bottom: 10px;
+     left: 50%;
+     transform: translateX(-50%);
+     width: 100px;
+     height: 4px;
+     background: linear-gradient(90deg, var(--secondary) 0%, var(--secondary-light) 100%);
+     border-radius: 2px;
+   }
  }
 
  p {
    font-size: clamp(18px, 3vw, 24px);
-   color: #fffacc;
-   margin: 1rem 0;
+   color: var(--secondary-lighter);
+   margin: 2rem 0;
    letter-spacing: 2px;
    opacity: 0;
    transform: translateY(50px);
    transition: all 0.5s ease;
    transition-delay: 0.2s;
+   font-weight: 500;
  }
 
  button {
-   background: #fffacc;
-   color: #0a6638;
+   background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-light) 100%);
+   color: var(--primary-dark);
    border: none;
-   padding: 1rem 2rem;
+   padding: 1rem 2.5rem;
    font-size: 1.1rem;
    border-radius: 50px;
    cursor: pointer;
@@ -61,17 +80,18 @@ const ErrorContent = styled.div`
    margin-top: 2rem;
    display: inline-flex;
    align-items: center;
-   gap: 0.5rem;
-   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+   gap: 0.8rem;
+   box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+   font-weight: 600;
 
    &:hover {
-     background: #fff;
-     transform: scale(1.05) translateY(-2px);
-     box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+     background: linear-gradient(135deg, var(--secondary-light) 0%, var(--secondary) 100%);
+     transform: scale(1.05) translateY(-3px);
+     box-shadow: 0 12px 25px rgba(0,0,0,0.25);
    }
 
    svg {
-     font-size: 1.2rem;
+     font-size: 1.3rem;
    }
  }
 
@@ -107,7 +127,7 @@ const BackgroundAnimation = styled.div`
    width: 150vmax;
    height: 150vmax;
    border-radius: 50%;
-   background: rgba(8, 74, 41, 0.4);
+   background: rgba(251, 194, 31, 0.1);
    animation: drift linear infinite;
    transform-origin: 50% 50%;
  }
@@ -140,7 +160,7 @@ const PawPrints = styled.div`
  width: 100%;
  height: 100%;
  opacity: 0.1;
- background-image: radial-gradient(circle, #fff 2px, transparent 2px);
+ background-image: radial-gradient(circle, var(--secondary-lighter) 2px, transparent 2px);
  background-size: 50px 50px;
 `;
 

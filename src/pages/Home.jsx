@@ -19,11 +19,18 @@ const SkeletonCard = styled(motion.div)`
   .skeleton-img {
     width: 100%;
     height: 200px;
-    background: #e9ecef;
+    background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 50%, #f0f0f0 100%);
+    background-size: 200% 100%;
+    animation: pulse 1.5s ease-in-out infinite;
   }
   
   .content {
     padding: 20px;
+  }
+  
+  @keyframes pulse {
+    0% { background-position: 0% 0%; }
+    100% { background-position: -200% 0%; }
   }
 `;
 
@@ -31,16 +38,16 @@ const SafetyIllustration = () => (
     <svg width="200" height="200" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path 
         d="M150 50C150 50 60 82 60 178C60 274 150 274 150 274C150 274 240 274 240 178C240 82 150 50 150 50Z" 
-        fill="#0a6638"
+        fill="var(--primary)"
       />
       <path 
         d="M120 180C120 180 140 200 150 200C160 200 180 180 180 180C180 180 160 220 150 220C140 220 120 180 120 180Z" 
-        fill="#fffacc"
+        fill="var(--secondary)"
       />
-      <circle cx="150" cy="140" r="40" fill="#fffacc"/>
+      <circle cx="150" cy="140" r="40" fill="var(--secondary)"/>
       <path 
         d="M130 140L145 155L175 125" 
-        stroke="#0a6638" 
+        stroke="var(--primary)" 
         strokeWidth="8" 
         strokeLinecap="round" 
         strokeLinejoin="round"
@@ -49,36 +56,107 @@ const SafetyIllustration = () => (
   );
   
 const HeroSection = styled.section`
-  background-color: #0a6638;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: #fff;
-  padding: 60px 0;
+  padding: 80px 0 60px;
   position: relative;
   overflow: hidden;
+  // margin-top: 76px;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at top right, rgba(251, 194, 31, 0.2) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  
+  h1 {
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    font-size: 2.8rem;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    color: #ffffff;
+    
+    @media (max-width: 768px) {
+      font-size: 2.2rem;
+    }
+  }
+  
+  p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 1;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    color: var(--secondary-lighter);
+    font-weight: 500;
+  }
 `;
 
 const SearchSection = styled.div`
-  background-color: #fff;
+  background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
   padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
   position: relative;
+  border: 1px solid rgba(251, 194, 31, 0.2);
+  
+  h2 {
+    color: var(--primary-dark);
+    font-weight: 600;
+    margin-bottom: 1.2rem;
+    font-size: 1.5rem;
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      width: 50px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+    }
+  }
 `;
 
 const SearchInput = styled.input`
   width: 100%;
   padding: 15px;
-  border: 1px solid #e0e0e0;
-  border-radius: 5px;
+  border: 1px solid rgba(192, 49, 21, 0.2);
+  border-radius: 8px;
   margin-bottom: 15px;
+  transition: all 0.3s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(192, 49, 21, 0.2);
+  }
 `;
 
 const SearchButton = styled(Button)`
   width: 100%;
-  background-color: #0a6638;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   border: none;
   padding: 15px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  color: #ffffff;
+  
   &:hover {
-    background-color: #085530;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(192, 49, 21, 0.3);
+    color: #ffffff;
+  }
+  
+  svg {
+    margin-right: 8px;
   }
 `;
 
@@ -88,68 +166,202 @@ const SuggestionDropdown = styled.div`
   left: 0;
   right: 0;
   background: #fff;
-  border: 1px solid #e0e0e0;
+  border: 1px solid rgba(192, 49, 21, 0.2);
   border-top: none;
   border-radius: 0 0 10px 10px;
   max-height: 300px;
   overflow-y: auto;
   z-index: 10;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
 `;
 
 const SuggestionItem = styled.div`
-  padding: 10px;
+  padding: 12px 15px;
   display: flex;
   align-items: center;
   cursor: pointer;
+  transition: all 0.2s ease;
+  
   &:hover {
-    background-color: #f8f9fa;
+    background-color: rgba(251, 194, 31, 0.1);
+    color: var(--primary);
   }
 `;
 
 const SafetyCard = styled.div`
-  background-color: #fffacc;
-  padding: 30px;
-  border-radius: 10px;
-  margin: 40px 0;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  padding: 40px;
+  border-radius: 15px;
+  margin: 60px 0;
   position: relative;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at top right, rgba(251, 194, 31, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  
+  h2 {
+    color: #ffffff;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    position: relative;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--secondary) 0%, var(--secondary-light) 100%);
+    }
+  }
+  
+  p {
+    color: var(--secondary-lighter);
+    font-size: 1.05rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.95;
+  }
+  
+  .btn-success {
+    background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-light) 100%);
+    border: none;
+    color: var(--primary-dark);
+    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    
+    &:hover {
+      background: linear-gradient(135deg, var(--secondary-light) 0%, var(--secondary) 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+  }
+  
+  .btn-warning {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--secondary-light);
+    color: var(--secondary-lighter);
+    font-weight: 500;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+      transform: translateY(-2px);
+    }
+  }
 `;
 
 const PetCard = styled(motion.div)`
   background: #fff;
-  border-radius: 10px;
+  border-radius: 15px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  height: 100%;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.12);
+  }
+  
   img {
     width: 100%;
-    height: 200px;
+    height: 220px;
     object-fit: cover;
+    border-bottom: 1px solid rgba(251, 194, 31, 0.2);
   }
+  
   .content {
     padding: 20px;
+    
+    h5 {
+      color: var(--primary-dark);
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    
+    p {
+      color: var(--text-dark);
+      margin-bottom: 15px;
+    }
+    
+    .price {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+    }
+    
+    .location {
+      color: #666;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      
+      svg {
+        margin-right: 5px;
+      }
+    }
   }
 `;
 
 const FeatureBox = styled(motion.div)`
   text-align: center;
-  padding: 20px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 30px 20px;
+  background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
   margin: 20px 0;
+  border: 1px solid rgba(251, 194, 31, 0.2);
+  transition: all 0.3s ease;
+  height: 100%;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.12);
+    border-color: rgba(192, 49, 21, 0.2);
+  }
   
   svg {
-    color: #0a6638;
-    font-size: 2rem;
+    color: var(--primary);
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(192, 49, 21, 0.05) 0%, rgba(192, 49, 21, 0.15) 100%);
+  }
+  
+  h3 {
+    color: var(--primary-dark);
+    font-weight: 600;
     margin-bottom: 15px;
+    font-size: 1.3rem;
+  }
+  
+  p {
+    color: #666;
+    font-size: 0.95rem;
+    line-height: 1.6;
   }
 `;
 const NoDataSVG = () => (
   <svg width="120" height="120" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="120" cy="120" r="80" fill="#f5f5f5"/>
-    <path d="M160 100c0 22.1-17.9 40-40 40s-40-17.9-40-40 17.9-40 40-40 40 17.9 40 40z" stroke="#0a6638" strokeWidth="8"/>
-    <path d="M170 170l-25-25" stroke="#0a6638" strokeWidth="8" strokeLinecap="round"/>
-    <path d="M120 80v40M100 100h40" stroke="#0a6638" strokeWidth="8" strokeLinecap="round"/>
+    <path d="M160 100c0 22.1-17.9 40-40 40s-40-17.9-40-40 17.9-40 40-40 40 17.9 40 40z" stroke="var(--primary)" strokeWidth="8"/>
+    <path d="M170 170l-25-25" stroke="var(--primary)" strokeWidth="8" strokeLinecap="round"/>
+    <path d="M120 80v40M100 100h40" stroke="var(--primary)" strokeWidth="8" strokeLinecap="round"/>
   </svg>
 );
 const Home = () => {
@@ -381,10 +593,10 @@ const Home = () => {
           <img 
             src={item.images?.[0] || cardImage} 
             alt={item.name} 
-            style={{ width: 50, height: 50, marginRight: 10, objectFit: 'cover' }}
+            style={{ width: 50, height: 50, marginRight: 10, objectFit: 'cover', borderRadius: '8px' }}
           />
           <div>
-            <strong style={{color: '#0a6638'}}>{item.name}</strong>
+            <strong style={{color: 'var(--primary)'}}>{item.name}</strong>
             <div style={{ fontSize: '0.8em', color: '#666' }}>
               {item.type === 'pet' ? 'Pet' : 'Accessory'} | ₹{item.price}
             </div>

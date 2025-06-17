@@ -126,7 +126,7 @@ const AboutUs = ({ isDarkMode }) => {
     <PageContainer isDarkMode={isDarkMode}>
       <HeroSection>
         <Container>
-          <h1>About Pets4Home</h1>
+          <h1>About PETXMAFIA</h1>
           <p className="lead mt-3">
             Creating happy homes for pets and their families since 2020
           </p>
@@ -139,7 +139,7 @@ const AboutUs = ({ isDarkMode }) => {
           <Row className="justify-content-center">
             <Col md={8}>
               <p className="text-center mb-5">
-                Pets4Home was founded with a simple mission: to create a safe and trusted platform where pets can find their forever homes. What started as a small community has grown into a nationwide network of pet lovers, trusted breeders, and passionate animal welfare advocates.
+              PETXMAFIA was founded with a simple mission: to create a safe and trusted platform where pets can find their forever homes. What started as a small community has grown into a nationwide network of pet lovers, trusted breeders, and passionate animal welfare advocates.
               </p>
             </Col>
           </Row>

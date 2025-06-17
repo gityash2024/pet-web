@@ -168,7 +168,7 @@ const PrivacyPolicy = ({ isDarkMode }) => {
 
           <SectionTitle>9. Contact Us</SectionTitle>
           <p>For privacy-related inquiries, contact us at:</p>
-          <p>Email: privacy@pets4home.com</p>
+          <p>Email: privacy@petxmafia.com</p>
           <p>Phone: +1 234 567 890</p>
           <p>Address: 123 Pet Street, NY 10001</p>
         </ContentSection>
