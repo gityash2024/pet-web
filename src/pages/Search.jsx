@@ -268,7 +268,28 @@ const Search = () => {
   };
 
   const handleViewDetails = (item) => {
-    navigate(`/ad/viewDetails/${item._id}`, { state: { advert: item } });
+    navigate(`/ad/viewDetails/${item._id}`, { 
+      state: { 
+        advert: {
+          ...item,
+          name: item.title || item.name,
+          breed: item.breed || item.category,
+          age: item.age || '',
+          ageUnit: item.ageUnit || 'weeks',
+          gender: item.gender || '',
+          healthStatus: item.healthStatus || '',
+          vaccinationDetails: item.vaccinationDetails || {
+            firstVaccination: false,
+            deworming: false,
+            boosters: false
+          },
+          vaccinationCertificates: item.vaccinationCertificates || [],
+          vetHealthCertificate: item.vetHealthCertificate || '',
+          microchipId: item.microchipId || '',
+          images: item.images || [item.image]
+        } 
+      } 
+    });
   };
 
   const handlePageChange = (pageNumber) => {

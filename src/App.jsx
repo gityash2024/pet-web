@@ -9,9 +9,11 @@ import AdDetails from './pages/AdDetails';
 import AddAdvert from './pages/AddAdvert';
 import Messages from './pages/Messages';
 import Profile from './pages/Profile';
+import Saved from './pages/Saved';
 import KnowledgeHub from './pages/KnowledgeHub';
 import KnowledgeDetails from './pages/KnowledgeHubDetails';
 import { AuthProvider } from './contexts/AuthContext';
+import SavedItemsProvider from './contexts/SavedItemsContext';
 import LoginModal from './components/LoginModal';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
@@ -52,17 +54,14 @@ function AppRoutes() {
           <Route path="/add-advert" element={<AddAdvert />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/saved" element={<Saved />} />
           <Route path="/knowledge-hub" element={<KnowledgeHub />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsAndConditions />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/contact" element={<ContactUs />} />
-
-
-
           <Route path="/knowledge-hub-details/:id" element={<KnowledgeDetails />} />
           <Route path="*" element={<NotFound />} /> 
-
         </Routes>
       </Layout>
       <ScrollToTopButton /> 

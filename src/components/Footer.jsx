@@ -157,7 +157,13 @@ const BottomBar = styled.div`
   }
 `;
 
-const Footer = () => {
+const AppDownloadSection = styled(FooterSection)`
+  @media (max-width: 768px) {
+    display: none; /* Hide the app download section on mobile */
+  }
+`;
+
+const Footer = ({ isDarkMode }) => {
   return (
     <StyledFooter>
       <Container>
@@ -201,7 +207,7 @@ const Footer = () => {
             </FooterSection>
           </Col>
           <Col md={3}>
-            <FooterSection>
+            <AppDownloadSection>
               <h5>Download Our App</h5>
               <p>Get the best pet shopping experience on our mobile app</p>
               <AppButtons>
@@ -212,7 +218,7 @@ const Footer = () => {
                   <FaApple /> App Store
                 </a>
               </AppButtons>
-            </FooterSection>
+            </AppDownloadSection>
           </Col>
         </Row>
       </Container>

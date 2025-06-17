@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import SendIcon from '@mui/icons-material/Send';
 import SearchIcon from '@mui/icons-material/Search';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -12,6 +13,7 @@ import ReplyIcon from '@mui/icons-material/Reply';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import { getUserMessages, sendMessage, markMessageAsRead } from '../contexts/api';
 import { toast } from 'react-toastify';
+import { useMediaQuery } from '@mui/material';
 
 const MainContainer = styled(Box)`
   background: linear-gradient(135deg, #f8f8f8 0%, var(--background-highlight) 100%);
@@ -216,6 +218,8 @@ const StyledAvatar = muiStyled(Avatar)(({ theme }) => ({
 }));
 
 const Messages = () => {
+  const isMobile = useMediaQuery('(max-width:768px)');
+  const [showConversations, setShowConversations] = useState(true);
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -225,8 +229,37 @@ const Messages = () => {
   const [selectedMessage, setSelectedMessage] = useState(null);
   const messagesEndRef = useRef(null);
   const messagesAreaRef = useRef(null);
-  const currentUser = JSON.parse(localStorage.getItem('user'));
+  const isLoggedIn = localStorage.getItem('token');
+  const currentUser = isLoggedIn ? JSON.parse(localStorage.getItem('user')) : null;
   const [lastScrollPosition, setLastScrollPosition] = useState(0);
+
+  // Check if user is authenticated
+  useEffect(() => {
+    if (!isLoggedIn) {
+      toast.error('Please login to view messages');
+      // Note: Navigation would be handled by the BottomNav component
+      return;
+    }
+  }, [isLoggedIn]);
+
+  // If not logged in, show a message instead of the full component
+  if (!isLoggedIn) {
+    return (
+      <MainContainer>
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          height="calc(100vh - 140px)"
+          sx={{ backgroundColor: '#f0f2f5' }}
+        >
+          <Typography variant="h6" color="textSecondary">
+            Please login to view your messages
+          </Typography>
+        </Box>
+      </MainContainer>
+    );
+  }
 
   useEffect(() => {
     let interval;
@@ -257,8 +290,8 @@ const Messages = () => {
   }, [messages]);
 
   const fetchMessages = async () => {
-    if (!localStorage.getItem('token')) {
-      toast.error('Please login to view messages');
+    if (!isLoggedIn) {
+      // Don't try to fetch if not logged in
       return;
     }
     
@@ -285,7 +318,14 @@ const Messages = () => {
         }
       }
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      // Check for auth errors specifically
+      if (error.response && error.response.status === 401) {
+        // Clear token if it's invalid
+        localStorage.removeItem('token');
+        toast.error('Your session has expired. Please login again.');
+      } else {
+        console.error('Error fetching messages:', error);
+      }
     }
   };
 
@@ -319,6 +359,10 @@ const Messages = () => {
     setSelectedConversation(conversation);
     setMessages(sortedMessages);
     
+    if (isMobile) {
+      setShowConversations(false);
+    }
+    
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
@@ -330,6 +374,10 @@ const Messages = () => {
     await Promise.all(
       unreadMessages.map(message => markMessageAsRead(message._id))
     );
+  };
+
+  const handleBackToConversations = () => {
+    setShowConversations(true);
   };
 
   const handleMessageOptions = (event, message) => {

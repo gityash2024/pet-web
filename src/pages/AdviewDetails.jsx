@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Button, Badge, Form } from 'react-bootstrap';
-import { FaPaw, FaMapMarkerAlt, FaPhone, FaEnvelope, FaHeart, FaArrowLeft, FaComments } from 'react-icons/fa';
+import { FaPaw, FaMapMarkerAlt, FaPhone, FaEnvelope, FaHeart, FaArrowLeft, FaUser } from 'react-icons/fa';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { startConversation } from '../contexts/api';
+import axios from 'axios';
 
 const Spinner = styled.div`
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -156,13 +157,32 @@ const StyledFormControl = styled(Form.Control)`
   }
 `;
 
-const AdviewDetails = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const ad = location.state?.advert;
+const LoadingContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 70vh;
+  flex-direction: column;
 
-  console.log(ad,'----------_____---____--Add view details____--____--____---___---____-')
-  const [isLoading, setIsLoading] = useState(false);
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #0a6638;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+  }
+`;
+
+const AdviewDetails = () => {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [ad, setAd] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const [isFormLoading, setIsFormLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -175,22 +195,62 @@ const AdviewDetails = () => {
 
   const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxYwYTOvqp9WBKswFDsHPK6FrL-oDojacB9A3TUjPdepFOoQarTpxhuKSDLQ_XonLk/exec';
 
-  if (!ad) {
-    navigate('/search');
-    return null;
-  }
+  // Fetch advert data on component mount
+  useEffect(() => {
+    const fetchAdvertData = async () => {
+      try {
+        setLoading(true);
+        let advertId = id;
+        
+        // Extract ID from URL if id param not available
+        if (!advertId) {
+          advertId = window.location.pathname.split('/').pop();
+        }
+        
+        if (!advertId) {
+          setError('Advertisement ID not found');
+          navigate('/search');
+          return;
+        }
+        
+        console.log('Fetching advert with ID:', advertId);
+        const response = await axios.get(`https://petsforhome-backend.onrender.com/api/pets/${advertId}`);
+        
+        if (response.data && response.data.status === 200) {
+          console.log('Fetched advert data:', response.data.pet);
+          setAd(response.data.pet);
+          
+          // Update form requirements
+          setFormData(prev => ({
+            ...prev,
+            requirements: `Interest in: ${response.data.pet.name} (${response.data.pet.category})`
+          }));
+        } else {
+          setError('Failed to load advertisement details');
+          toast.error('Failed to load advertisement details');
+        }
+      } catch (error) {
+        console.error('Error fetching advert:', error);
+        setError('Failed to load advertisement details');
+        toast.error('Failed to load advertisement details');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAdvertData();
+  }, [id, navigate]);
 
   const handleFormChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
-      requirements: `Interest in: ${ad.name} (${ad.category})`
+      [e.target.name]: e.target.value
     });
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsFormLoading(true);
 
     try {
       await fetch(FORM_ENDPOINT, {
@@ -210,18 +270,20 @@ const AdviewDetails = () => {
         type: 'profile',
         interest: 'Pet Interest',
         source: 'Ad Details Page',
-        requirements: ''
+        requirements: ad ? `Interest in: ${ad.name} (${ad.category})` : ''
       });
       handleStartConversation();
     } catch (error) {
       console.error('Submission error:', error);
       toast.error('Failed to send message. Please try again.');
     } finally {
-      setIsLoading(false);
+      setIsFormLoading(false);
     }
   };
 
   const handleStartConversation = async () => {
+    if (!ad) return;
+    
     const token = localStorage.getItem('token');
     if (!token) {
       toast.error('Please login to start a conversation');
@@ -229,7 +291,7 @@ const AdviewDetails = () => {
     }
 
     try {
-      setIsLoading(true);
+      setIsFormLoading(true);
       const response = await startConversation(ad._id);
       
       if (response.data && (response.data.status === 200 || response.data.status === 201)) {
@@ -246,9 +308,29 @@ const AdviewDetails = () => {
       console.error('Error starting conversation:', error);
       toast.error('Failed to start conversation. Please try again.');
     } finally {
-      setIsLoading(false);
+      setIsFormLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <LoadingContainer>
+        <div className="spinner"></div>
+        <p>Loading advertisement details...</p>
+      </LoadingContainer>
+    );
+  }
+
+  if (error || !ad) {
+    return (
+      <Container className="py-5 text-center">
+        <h3>Oops! {error || 'Advertisement not found'}</h3>
+        <Button variant="primary" onClick={() => navigate('/search')} className="mt-3">
+          Browse Pets
+        </Button>
+      </Container>
+    );
+  }
 
   return (
     <StyledAdDetails>
@@ -285,12 +367,32 @@ const AdviewDetails = () => {
               <SectionTitle>Contact Information</SectionTitle>
               <ContactInfo>
                 <FaHeart />
-                <span>Age: {ad.age} years</span>
+                <span>Age: {ad.age ? `${ad.age} ${ad.ageUnit || 'weeks'}` : 'Not specified'}</span>
               </ContactInfo>
               <ContactInfo>
                 <FaPaw />
-                <span>Breed: {ad.breed}</span>
+                <span>Breed: {ad.breed || 'Not specified'}</span>
               </ContactInfo>
+              {ad.owner && (
+                <>
+                  <ContactInfo>
+                    <FaUser />
+                    <span>Owner: {ad.owner.name || 'Not specified'}</span>
+                  </ContactInfo>
+                  {ad.owner.phone && (
+                    <ContactInfo>
+                      <FaPhone />
+                      <span>Phone: {ad.owner.phone}</span>
+                    </ContactInfo>
+                  )}
+                  {ad.owner.email && (
+                    <ContactInfo>
+                      <FaEnvelope />
+                      <span>Email: {ad.owner.email}</span>
+                    </ContactInfo>
+                  )}
+                </>
+              )}
             </GlassmorphicCard>
             <GlassmorphicCard
               initial={{ opacity: 0, y: 50 }}
@@ -333,9 +435,9 @@ const AdviewDetails = () => {
                 <StyledButton 
                   type="submit" 
                   className="w-100 d-flex align-items-center justify-content-center"
-                  disabled={isLoading}
+                  disabled={isFormLoading}
                 >
-                  {isLoading ? (
+                  {isFormLoading ? (
                     <>
                       Sending
                       <Spinner />

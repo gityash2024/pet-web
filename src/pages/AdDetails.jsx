@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import { startConversation } from '../contexts/api';
 import { Email, Person, Publish } from '@mui/icons-material';
 import { Copy } from 'lucide-react';
+import { IconButton } from '@mui/material';
 
 const Spinner = styled.div`
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -155,6 +156,50 @@ const StyledFormControl = styled(Form.Control)`
   &:focus {
     border-color: var(--primary-light);
     box-shadow: 0 0 0 0.2rem rgba(215, 118, 32, 0.25);
+  }
+`;
+
+const DetailSection = styled.div`
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  
+  h4 {
+    color: #0a6638;
+    margin-bottom: 15px;
+  }
+`;
+
+const DetailItem = styled.div`
+  display: flex;
+  margin-bottom: 10px;
+  
+  .label {
+    font-weight: bold;
+    width: 150px;
+    color: #666;
+  }
+  
+  .value {
+    flex: 1;
+  }
+`;
+
+const VaccinationBadge = styled(Badge)`
+  margin-right: 10px;
+  background-color: ${props => props.active ? '#0a6638' : '#e0e0e0'};
+  color: ${props => props.active ? 'white' : '#666'};
+  padding: 8px 12px;
+`;
+
+const CertificateLink = styled.a`
+  color: #0a6638;
+  text-decoration: underline;
+  display: inline-block;
+  margin-right: 10px;
+  
+  &:hover {
+    color: #084a29;
   }
 `;
 

@@ -1,5 +1,6 @@
 import Header from './Header';
 import Footer from './Footer';
+import BottomNav from './BottomNav/BottomNav';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useScrollTop } from '../hooks/useScrollTop';
@@ -39,6 +40,8 @@ const MainContent = styled.main`
 
 const Layout = ({ children, isDarkMode, toggleTheme, handleLoginModal }) => {
   useScrollTop();
+  const isLoggedIn = localStorage.getItem('token');
+  
   return (
     <LayoutWrapper isDarkMode={isDarkMode}>
       <Header 
@@ -52,6 +55,10 @@ const Layout = ({ children, isDarkMode, toggleTheme, handleLoginModal }) => {
         {children}
       </MainContent>
       <Footer isDarkMode={isDarkMode} />
+      <BottomNav 
+        isLoggedIn={isLoggedIn}
+        handleLoginModal={handleLoginModal}
+      />
     </LayoutWrapper>
   );
 };
