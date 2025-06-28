@@ -26,7 +26,7 @@ const PageContainer = styled.div`
 `;
 
 const HeaderSection = styled.div`
-  background: #0a6638;
+  background: #ffcc00;
   color: white;
   padding: 60px 0;
   text-align: center;
@@ -57,7 +57,7 @@ const ContactCard = styled(Card)`
   }
   
   .icon {
-    color: #0a6638;
+    color: #ffcc00;
     font-size: 2rem;
     margin-bottom: 15px;
   }
@@ -87,13 +87,13 @@ const ContactForm = styled(Form)`
     
     &:focus {
       box-shadow: 0 0 0 0.2rem rgba(10, 102, 56, 0.25);
-      border-color: #0a6638;
+      border-color: #ffcc00;
     }
   }
 `;
 
 const SubmitButton = styled(Button)`
-  background: #0a6638;
+  background: #ffcc00;
   border: none;
   padding: 10px 30px;
   display: flex;

@@ -21,7 +21,7 @@ const StyledAddAdvert = styled.div`
 `;
 
 const Header = styled.div`
- background-color: ${props => props.isDarkMode ? '#0a6638' : '#fff'};
+ background-color: ${props => props.isDarkMode ? '#ffcc00' : '#fff'};
  padding: 20px 0;
  margin-bottom: 30px;
  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -88,7 +88,7 @@ const AdvertCard = styled(motion.div)`
 
     .category-badge {
       background: #fffacc;
-      color: #0a6638;
+      color: #ffcc00;
       padding: 5px 10px;
       border-radius: 20px;
       font-size: 0.8rem;
@@ -101,7 +101,7 @@ const AdvertCard = styled(motion.div)`
 
       .icon {
         background: white;
-        color: #0a6638;
+        color: #ffcc00;
         padding: 8px;
         border-radius: 50%;
         cursor: pointer;
@@ -158,15 +158,15 @@ const AdvertCard = styled(motion.div)`
     .card-price {
       font-size: 1.3rem;
       font-weight: bold;
-      color: #0a6638;
+      color: #ffcc00;
     }
 
     .view-btn {
-      border-color: #0a6638;
-      color: #0a6638;
+      border-color: #ffcc00;
+      color: #ffcc00;
       
       &:hover {
-        background: #0a6638;
+        background: #ffcc00;
         color: white;
       }
     }
@@ -214,7 +214,7 @@ const AdvertListing = styled(motion.div)`
       top: 10px;
       left: 10px;
       background: #fffacc;
-      color: #0a6638;
+      color: #ffcc00;
       padding: 5px 10px;
       border-radius: 20px;
       font-size: 0.8rem;
@@ -243,7 +243,7 @@ const AdvertListing = styled(motion.div)`
 
     .price {
       font-size: 1.5rem;
-      color: #0a6638;
+      color: #ffcc00;
       font-weight: bold;
     }
 
@@ -288,7 +288,7 @@ const AdvertListing = styled(motion.div)`
       font-weight: 500;
 
       &.view {
-        background: #0a6638;
+        background: #ffcc00;
         color: white;
         
         &:hover {
@@ -298,8 +298,8 @@ const AdvertListing = styled(motion.div)`
 
       &.edit {
         background: transparent;
-        border: 1px solid #0a6638;
-        color: #0a6638;
+        border: 1px solid #ffcc00;
+        color: #ffcc00;
 
         &:hover {
           background: #0a663810;
@@ -333,8 +333,8 @@ const ActionButtons = styled.div`
 
   button {
     flex: 1;
-    background-color: #0a6638;
-    border-color: #0a6638;
+    background-color: #ffcc00;
+    border-color: #ffcc00;
     
     &:hover {
       background-color: #084a29;
@@ -344,8 +344,8 @@ const ActionButtons = styled.div`
 `;
 
 const AddButton = styled(Button)`
-  background-color: #0a6638;
-  border-color: #0a6638;
+  background-color: #ffcc00;
+  border-color: #ffcc00;
   
   &:hover {
     background-color: #084a29;

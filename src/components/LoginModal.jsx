@@ -205,7 +205,7 @@ const StyledInput = styled(Form.Control)`
 
  &:focus {
    background: ${props => props.isDarkMode ? 'rgba(255,255,255,0.15)' : '#fff'};
-   border-color: #0a6638;
+   border-color: #ffcc00;
    box-shadow: 0 0 0 0.2rem rgba(10,102,56,0.25);
  }
 `;
@@ -470,7 +470,7 @@ const LoginModal = ({ show, handleClose, isDarkMode, onLoginSuccess }) => {
           generateOTP({ phoneNumber });
           toast.success('New OTP sent successfully');
         }}
-        style={{ color: '#0a6638', marginTop: '1rem' }}
+        style={{ color: '#ffcc00', marginTop: '1rem' }}
       >
         Resend code
       </Button>

@@ -27,10 +27,10 @@ const StyledToastContainer = styled(ToastifyContainer)`
   }
 
   .Toastify__toast--success {
-    border-left-color: #0a6638;
+    border-left-color: #ffcc00;
     
     .Toastify__toast-icon {
-      color: #0a6638;
+      color: #ffcc00;
     }
   }
 

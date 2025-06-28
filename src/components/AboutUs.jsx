@@ -14,7 +14,7 @@ const PageContainer = styled.div`
 `;
 
 const HeroSection = styled.div`
-  background: #0a6638;
+  background: #ffcc00;
   color: white;
   padding: 80px 0;
   text-align: center;
@@ -34,13 +34,13 @@ const ValueCard = styled(motion.div)`
 
   svg {
     font-size: 40px;
-    color: #0a6638;
+    color: #ffcc00;
     margin-bottom: 20px;
   }
 
   h3 {
     margin-bottom: 15px;
-    color: ${props => props.isDarkMode ? '#fffacc' : '#0a6638'};
+    color: ${props => props.isDarkMode ? '#fffacc' : '#ffcc00'};
   }
 `;
 
@@ -63,7 +63,7 @@ const TeamCard = styled(motion.div)`
   }
 
   h4 {
-    color: ${props => props.isDarkMode ? '#fffacc' : '#0a6638'};
+    color: ${props => props.isDarkMode ? '#fffacc' : '#ffcc00'};
     margin-bottom: 5px;
   }
 
@@ -188,7 +188,7 @@ const AboutUs = ({ isDarkMode }) => {
         </Container>
       </Section>
 
-      <Section style={{ background: '#0a6638', color: 'white' }}>
+      <Section style={{ background: '#ffcc00', color: 'white' }}>
         <Container>
           <Row className="align-items-center">
             <Col md={6}>

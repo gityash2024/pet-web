@@ -32,7 +32,7 @@ const NavItem = styled(Link)`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: ${props => props.isActive ? '#0a6638' : '#777'};
+  color: ${props => props.isActive ? '#ffcc00' : '#777'};
   text-decoration: none;
   height: 100%;
   flex: 1;
@@ -41,7 +41,7 @@ const NavItem = styled(Link)`
   transition: all 0.2s ease;
   
   &:hover {
-    color: #0a6638;
+    color: #ffcc00;
   }
 
   svg {
@@ -64,7 +64,7 @@ const NavItem = styled(Link)`
     transform: translateX(-50%);
     width: ${props => props.isActive ? '40%' : '0'};
     height: 3px;
-    background-color: #0a6638;
+    background-color: #ffcc00;
     border-radius: 2px 2px 0 0;
     transition: width 0.2s ease;
   }

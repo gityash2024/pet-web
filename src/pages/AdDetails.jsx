@@ -165,7 +165,7 @@ const DetailSection = styled.div`
   border-top: 1px solid #eee;
   
   h4 {
-    color: #0a6638;
+    color: #ffcc00;
     margin-bottom: 15px;
   }
 `;
@@ -187,13 +187,13 @@ const DetailItem = styled.div`
 
 const VaccinationBadge = styled(Badge)`
   margin-right: 10px;
-  background-color: ${props => props.active ? '#0a6638' : '#e0e0e0'};
+  background-color: ${props => props.active ? '#ffcc00' : '#e0e0e0'};
   color: ${props => props.active ? 'white' : '#666'};
   padding: 8px 12px;
 `;
 
 const CertificateLink = styled.a`
-  color: #0a6638;
+  color: #ffcc00;
   text-decoration: underline;
   display: inline-block;
   margin-right: 10px;

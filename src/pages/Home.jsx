@@ -50,14 +50,14 @@ const MobileSearchInput = styled.input`
   
   &:focus {
     outline: none;
-    border-color: #0a6638;
+    border-color: #ffcc00;
   }
 `;
 
 const FilterButton = styled.button`
   background: none;
   border: none;
-  color: #0a6638;
+  color: #ffcc00;
   font-size: 16px;
   font-weight: bold;
   padding: 10px 15px;
@@ -91,7 +91,7 @@ const CategoryButton = styled.button`
   margin-right: 10px;
   border-radius: 50px;
   border: 2px solid #e0e0e0;
-  background-color: ${props => props.active ? '#0a6638' : '#fff'};
+  background-color: ${props => props.active ? '#ffcc00' : '#fff'};
   color: ${props => props.active ? '#fff' : '#333'};
   font-weight: 500;
   cursor: pointer;
@@ -102,15 +102,15 @@ const CategoryButton = styled.button`
   }
   
   &:hover {
-    border-color: #0a6638;
-    color: ${props => props.active ? '#fff' : '#0a6638'};
+    border-color: #ffcc00;
+    color: ${props => props.active ? '#fff' : '#ffcc00'};
   }
 `;
 
 const ChooseCategoryButton = styled(CategoryButton)`
-  background-color: #0a6638;
+  background-color: #ffcc00;
   color: #fff;
-  border-color: #0a6638;
+  border-color: #ffcc00;
 `;
 
 const AdvertSection = styled.div`
@@ -989,7 +989,7 @@ const Home = () => {
                                   style={{ width: 50, height: 50, marginRight: 10, objectFit: 'cover' }}
                                 />
                                 <div>
-                                  <strong style={{color: '#0a6638'}}>{item.name}</strong>
+                                  <strong style={{color: '#ffcc00'}}>{item.name}</strong>
                                   <div style={{ fontSize: '0.8em', color: '#666' }}>
                                     {item.type === 'pet' ? 'Pet' : 'Accessory'} | ₹{item.price}
                                   </div>

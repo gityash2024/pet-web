@@ -10,7 +10,7 @@ const StyledContainer = styled(Container)`
   
   h1 {
     margin-bottom: 2rem;
-    color: #0a6638;
+    color: #ffcc00;
   }
   
   .saved-card {
@@ -29,13 +29,13 @@ const StyledContainer = styled(Container)`
     
     .card-title {
       font-weight: 600;
-      color: #0a6638;
+      color: #ffcc00;
     }
     
     .card-price {
       font-weight: 700;
       font-size: 1.2rem;
-      color: #0a6638;
+      color: #ffcc00;
     }
     
     .card-footer {
@@ -76,8 +76,8 @@ const StyledContainer = styled(Container)`
     
     .btn-browse {
       margin-top: 1rem;
-      background-color: #0a6638;
-      border-color: #0a6638;
+      background-color: #ffcc00;
+      border-color: #ffcc00;
       
       &:hover {
         background-color: #085530;
